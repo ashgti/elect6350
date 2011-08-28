@@ -98,12 +98,19 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Left Wheel Speed (rad/s)</string>
+          <string>Left Wheel Speed (rev/s)</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="left_wheel_spinbox"/>
+        <widget class="QSpinBox" name="left_wheel_spinbox">
+         <property name="minimum">
+          <number>-10</number>
+         </property>
+         <property name="maximum">
+          <number>10</number>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QSlider" name="left_wheel_slider">
@@ -127,12 +134,19 @@
        <item>
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Right Wheel Speed (rad/s)</string>
+          <string>Right Wheel Speed (rev/s)</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="right_wheel_spinbox"/>
+        <widget class="QSpinBox" name="right_wheel_spinbox">
+         <property name="minimum">
+          <number>-10</number>
+         </property>
+         <property name="maximum">
+          <number>10</number>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QSlider" name="right_wheel_slider">
@@ -201,7 +215,14 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="linear_velocity_spinbox"/>
+        <widget class="QSpinBox" name="linear_velocity_spinbox">
+         <property name="minimum">
+          <number>-10</number>
+         </property>
+         <property name="maximum">
+          <number>10</number>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QSlider" name="linear_velocity_slider">
@@ -230,7 +251,14 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="angular_velocity_spinbox"/>
+        <widget class="QSpinBox" name="angular_velocity_spinbox">
+         <property name="minimum">
+          <number>-10</number>
+         </property>
+         <property name="maximum">
+          <number>10</number>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QSlider" name="angular_velocity_slider">
