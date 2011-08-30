@@ -32,6 +32,10 @@ class DifferentialKinematics(object):
         right_wheel_speed is the angular velocity of the right wheel of the robot. (rev/s)
         Returns the linear and angular velocity of the robot in the robot frame (R).
         """
+        if not left_wheel_speed: left_wheel_speed = self.left_wheel_speed
+        if not right_wheel_speed: right_wheel_speed = self.right_wheel_speed
+        left_wheel_speed = float(left_wheel_speed)
+        right_wheel_speed = float(right_wheel_speed)
         if (left_wheel_speed == right_wheel_speed):
             return (left_wheel_speed, 0)
         elif (left_wheel_speed == -right_wheel_speed):
@@ -40,7 +44,7 @@ class DifferentialKinematics(object):
             return ((right_wheel_speed + left_wheel_speed) / 2.0,
                     (right_wheel_speed - left_wheel_speed) / self.track_length)
     
-    def inverse(self, linear_vel, angular_vel):
+    def inverse(self, linear_vel = None, angular_vel = None):
         """
         This returns (left_wheel_speed, right_wheel_speed) given linear and angular velocity.
         
@@ -48,8 +52,12 @@ class DifferentialKinematics(object):
         angular_vel is the angular velocity in the Robot frame (R). (rad/s)
         Returns the left wheel and right wheel speed. (rev/s)
         """
-        return (linear_vel - self.track_length * angular_vel/2,
-                linear_vel + self.track_length * angular_vel/2)
+        if not linear_vel: linear_vel = self.linear_velocity
+        if not angular_vel: angular_vel = self.angular_velocity
+        self.left_wheel_speed = linear_vel - self.track_length * angular_vel/2
+        self.right_wheel_speed = linear_vel + self.track_length * angular_vel/2
+        return (self.left_wheel_speed,
+                self.right_wheel_speed)
     
     def stepSimulation(self, time_delta):
         """

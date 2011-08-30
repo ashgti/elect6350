@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>600</height>
+    <height>602</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -246,7 +246,7 @@
        <item>
         <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>Angular Velocity (m/s)</string>
+          <string>Angular Velocity (rad/s)</string>
          </property>
         </widget>
        </item>
@@ -370,6 +370,70 @@
     <hint type="destinationlabel">
      <x>787</x>
      <y>204</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>linear_velocity_slider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>linear_velocity_spinbox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>787</x>
+     <y>392</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>787</x>
+     <y>354</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>linear_velocity_spinbox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>linear_velocity_slider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>787</x>
+     <y>354</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>787</x>
+     <y>392</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>angular_velocity_slider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>angular_velocity_spinbox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>787</x>
+     <y>489</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>787</x>
+     <y>451</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>angular_velocity_spinbox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>angular_velocity_slider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>787</x>
+     <y>451</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>787</x>
+     <y>489</y>
     </hint>
    </hints>
   </connection>
