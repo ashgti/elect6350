@@ -56,10 +56,10 @@
             <number>1</number>
            </property>
            <property name="maximum">
-            <number>10</number>
+            <number>3</number>
            </property>
            <property name="pageStep">
-            <number>10</number>
+            <number>1</number>
            </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -69,6 +69,19 @@
            </property>
            <property name="tickInterval">
             <number>1</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="sim_time_label">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>10 Sim Steps per Second</string>
            </property>
           </widget>
          </item>
@@ -103,12 +116,18 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="left_wheel_spinbox">
+        <widget class="QDoubleSpinBox" name="left_wheel_spinbox">
+         <property name="decimals">
+          <number>6</number>
+         </property>
          <property name="minimum">
-          <number>-10</number>
+          <double>-10.000000000000000</double>
          </property>
          <property name="maximum">
-          <number>10</number>
+          <double>10.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
          </property>
         </widget>
        </item>
@@ -139,12 +158,18 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="right_wheel_spinbox">
+        <widget class="QDoubleSpinBox" name="right_wheel_spinbox">
+         <property name="decimals">
+          <number>6</number>
+         </property>
          <property name="minimum">
-          <number>-10</number>
+          <double>-10.000000000000000</double>
          </property>
          <property name="maximum">
-          <number>10</number>
+          <double>10.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
          </property>
         </widget>
        </item>
@@ -215,12 +240,18 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="linear_velocity_spinbox">
+        <widget class="QDoubleSpinBox" name="linear_velocity_spinbox">
+         <property name="decimals">
+          <number>6</number>
+         </property>
          <property name="minimum">
-          <number>-10</number>
+          <double>-10.000000000000000</double>
          </property>
          <property name="maximum">
-          <number>10</number>
+          <double>10.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
          </property>
         </widget>
        </item>
@@ -251,12 +282,18 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="angular_velocity_spinbox">
+        <widget class="QDoubleSpinBox" name="angular_velocity_spinbox">
+         <property name="decimals">
+          <number>6</number>
+         </property>
          <property name="minimum">
-          <number>-10</number>
+          <double>-10.000000000000000</double>
          </property>
          <property name="maximum">
-          <number>10</number>
+          <double>10.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
          </property>
         </widget>
        </item>
@@ -308,134 +345,5 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>left_wheel_slider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>left_wheel_spinbox</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>787</x>
-     <y>107</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>787</x>
-     <y>69</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>left_wheel_spinbox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>left_wheel_slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>787</x>
-     <y>69</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>787</x>
-     <y>107</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>right_wheel_slider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>right_wheel_spinbox</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>787</x>
-     <y>204</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>787</x>
-     <y>166</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>right_wheel_spinbox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>right_wheel_slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>787</x>
-     <y>166</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>787</x>
-     <y>204</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>linear_velocity_slider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>linear_velocity_spinbox</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>787</x>
-     <y>392</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>787</x>
-     <y>354</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>linear_velocity_spinbox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>linear_velocity_slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>787</x>
-     <y>354</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>787</x>
-     <y>392</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>angular_velocity_slider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>angular_velocity_spinbox</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>787</x>
-     <y>489</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>787</x>
-     <y>451</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>angular_velocity_spinbox</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>angular_velocity_slider</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>787</x>
-     <y>451</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>787</x>
-     <y>489</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
