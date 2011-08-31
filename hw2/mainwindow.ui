@@ -81,7 +81,14 @@
             </size>
            </property>
            <property name="text">
-            <string>10 Sim Steps per Second</string>
+            <string>5 Sim Steps per Second</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toolButton">
+           <property name="text">
+            <string>Graph...</string>
            </property>
           </widget>
          </item>

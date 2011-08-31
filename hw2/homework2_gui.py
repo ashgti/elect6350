@@ -80,17 +80,17 @@ class MainWindow(QtGui.QMainWindow):
     def onSimTimeSliderChanged(self, value):
         """Handle the Sim Time slider changing"""
         if value == 1:
+            self.sim_period = 0.2
+            self.sim_timer.setInterval(self.sim_period*1000.0)
+            self.ui.sim_time_label.setText("5 Sim Steps per Second")
+        elif value == 2:
             self.sim_period = 0.1
             self.sim_timer.setInterval(self.sim_period*1000.0)
             self.ui.sim_time_label.setText("10 Sim Steps per Second")
-        elif value == 2:
+        elif value == 3:
             self.sim_period = 0.01
             self.sim_timer.setInterval(self.sim_period*1000.0)
             self.ui.sim_time_label.setText("100 Sim Steps per Second")
-        elif value == 3:
-            self.sim_period = 0.001
-            self.sim_timer.setInterval(self.sim_period*1000.0)
-            self.ui.sim_time_label.setText("1,000 Sim Steps per Second")
     
     @QtCore.Slot(str)
     def onLeftWheelSpeedChanged(self, value):
