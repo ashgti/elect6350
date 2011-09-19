@@ -99,14 +99,18 @@ void doCanny(cv::Mat input) {
 void doCannyWithNoise(cv::Mat input) {
   // Create some noise
   cv::Mat noise, noisy_input;
-  cv::randn(noise, cv::Scalar::all(0.0), cv::Scalar::all(1.0));
-  cv::addWeighted(input, 0.5, noise, 0.5, 0, noisy_input);
+  noise = input.clone();
+  noisy_input = input.clone();
+  cv::randn(noise, cv::Scalar::all(0.0), cv::Scalar::all(25.0));
+  cv::add(input, noise, noisy_input);
+  
+  cv::imshow("Original Image with Noise", noisy_input);
   
   cv::Mat detected_edges;
   
   cv::Canny(noisy_input, detected_edges, 50, 200, 3);
   
-  cv::imshow("Canny Edge Detection", detected_edges);
+  cv::imshow("Canny Edge Detection with Noise", detected_edges);
   
   //   Do Hough Transform
   cv::Mat color_canny_hough;
@@ -120,7 +124,7 @@ void doCannyWithNoise(cv::Mat input) {
     cv::line( color_canny_hough, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(0,0,255), 3, CV_AA);
   }
   
-  cv::imshow("Canny Edge Detection with Hough Transform", color_canny_hough);
+  cv::imshow("Canny Edge Detection with Noise and Hough Transform", color_canny_hough);
 }
 
 void doSIFT(cv::Mat input) {
@@ -149,7 +153,7 @@ int main(int argc, const char* argv[])
   // doLaplace(input);
   
   // Do canny edge detection
-  // doCanny(input);
+  doCanny(input);
   
   // Do canny edge detection with noise
   doCannyWithNoise(input);
