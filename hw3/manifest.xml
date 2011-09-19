@@ -1,0 +1,16 @@
+<package>
+  <description brief="hw3">
+
+     hw3
+
+  </description>
+  <author>William Woodall</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/hw3</url>
+  <depend package="roscpp"/>
+  <depend package="opencv2"/>
+
+</package>
+
+
