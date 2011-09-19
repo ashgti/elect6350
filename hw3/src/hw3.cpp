@@ -57,7 +57,7 @@ void doLaplace(cv::Mat input) {
   
   convertScaleAbs( dst, abs_dst );
   
-  // cv::imshow("Laplace Edge Detection", abs_dst);
+  cv::imshow("Laplace Edge Detection", abs_dst);
   
   //   Do Hough Transform
   cv::Mat color_laplace_hough;
@@ -127,7 +127,7 @@ void doCannyWithNoise(cv::Mat input) {
   cv::imshow("Canny Edge Detection with Noise and Hough Transform", color_canny_hough);
 }
 
-void doSIFT(cv::Mat input) {
+void doSIFT(cv::Mat input, const char* window_name) {
   cv::SiftFeatureDetector detector;
   std::vector<cv::KeyPoint> keypoints;
   detector.detect(input, keypoints);
@@ -135,13 +135,33 @@ void doSIFT(cv::Mat input) {
   // Add results to image and save.
   cv::Mat output;
   cv::drawKeypoints(input, keypoints, output);
-  cv::imshow("SIFT Features", output);
+  cv::imshow(window_name, output);
+}
+
+void doSIFTWithNoise(cv::Mat input, const char* window_name) {
+  // Create some noise
+  cv::Mat noise, noisy_input;
+  noise = input.clone();
+  noisy_input = input.clone();
+  cv::randn(noise, cv::Scalar::all(0.0), cv::Scalar::all(25.0));
+  cv::add(input, noise, noisy_input);
+  
+  cv::SiftFeatureDetector detector;
+  std::vector<cv::KeyPoint> keypoints;
+  detector.detect(noisy_input, keypoints);
+  
+  // Add results to image and save.
+  cv::Mat output;
+  cv::drawKeypoints(noisy_input, keypoints, output);
+  cv::imshow(window_name, output);
 }
 
 int main(int argc, const char* argv[])
 {
   // Load original Image
   cv::Mat input = cv::imread("hallway.jpg", 0); // Load as grayscale
+  cv::Mat input_med = cv::imread("hallway_medium.jpg", 0); // Load as grayscale
+  cv::Mat input_sml = cv::imread("hallway_small.jpg", 0); // Load as grayscale
   
   // Show it
   cv::imshow("Original Image", input);
@@ -153,14 +173,21 @@ int main(int argc, const char* argv[])
   // doLaplace(input);
   
   // Do canny edge detection
-  doCanny(input);
+  // doCanny(input);
   
   // Do canny edge detection with noise
-  doCannyWithNoise(input);
+  // doCannyWithNoise(input);
   
   // Do SIFT detection
-  // doSIFT(input);
+  // doSIFT(input, "SIFT Features Large");
+  // doSIFT(input_med, "SIFT Features Medium");
+  // doSIFT(input_sml, "SIFT Features Small");
+  
+  // Do SIFT with Noise
+  doSIFTWithNoise(input, "SIFT Features Large with Noise");
+  doSIFTWithNoise(input_med, "SIFT Features Medium with Noise");
+  doSIFTWithNoise(input_sml, "SIFT Features Small with Noise");
   
   // Wait for key
-  cv::waitKey();
+  while (cv::waitKey() != 27) { };
 }
