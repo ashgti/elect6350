@@ -143,7 +143,7 @@ void doSIFTWithNoise(cv::Mat input, const char* window_name) {
   cv::Mat noise, noisy_input;
   noise = input.clone();
   noisy_input = input.clone();
-  cv::randn(noise, cv::Scalar::all(0.0), cv::Scalar::all(25.0));
+  cv::randn(noise, cv::Scalar::all(0.0), cv::Scalar::all(10.0));
   cv::add(input, noise, noisy_input);
   
   cv::SiftFeatureDetector detector;
@@ -167,21 +167,21 @@ int main(int argc, const char* argv[])
   cv::imshow("Original Image", input);
   
   // Do Sobel edge detection
-  // doSobel(input);
+  doSobel(input);
   
   // Do Laplace edge detection
-  // doLaplace(input);
+  doLaplace(input);
   
   // Do canny edge detection
-  // doCanny(input);
+  doCanny(input);
   
   // Do canny edge detection with noise
-  // doCannyWithNoise(input);
+  doCannyWithNoise(input);
   
   // Do SIFT detection
-  // doSIFT(input, "SIFT Features Large");
-  // doSIFT(input_med, "SIFT Features Medium");
-  // doSIFT(input_sml, "SIFT Features Small");
+  doSIFT(input, "SIFT Features Large");
+  doSIFT(input_med, "SIFT Features Medium");
+  doSIFT(input_sml, "SIFT Features Small");
   
   // Do SIFT with Noise
   doSIFTWithNoise(input, "SIFT Features Large with Noise");

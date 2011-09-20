@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Wed Aug 31 12:12:25 2011
+# Created: Wed Sep  7 12:16:30 2011
 #      by: pyside-uic 0.2.13 running on PySide 1.0.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -38,6 +38,7 @@ class Ui_MainWindow(object):
         self.sim_time_slider.setMinimum(1)
         self.sim_time_slider.setMaximum(3)
         self.sim_time_slider.setPageStep(1)
+        self.sim_time_slider.setProperty("value", 2)
         self.sim_time_slider.setOrientation(QtCore.Qt.Horizontal)
         self.sim_time_slider.setTickPosition(QtGui.QSlider.TicksAbove)
         self.sim_time_slider.setTickInterval(1)
@@ -47,9 +48,9 @@ class Ui_MainWindow(object):
         self.sim_time_label.setMaximumSize(QtCore.QSize(16777215, 24))
         self.sim_time_label.setObjectName("sim_time_label")
         self.horizontalLayout.addWidget(self.sim_time_label)
-        self.toolButton = QtGui.QToolButton(self.groupBox)
-        self.toolButton.setObjectName("toolButton")
-        self.horizontalLayout.addWidget(self.toolButton)
+        self.graph_button = QtGui.QToolButton(self.groupBox)
+        self.graph_button.setObjectName("graph_button")
+        self.horizontalLayout.addWidget(self.graph_button)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.gridLayout.addWidget(self.groupBox, 0, 0, 2, 1)
         self.groupBox_2 = QtGui.QGroupBox(self.centralwidget)
@@ -66,6 +67,7 @@ class Ui_MainWindow(object):
         self.left_wheel_spinbox.setMinimum(-10.0)
         self.left_wheel_spinbox.setMaximum(10.0)
         self.left_wheel_spinbox.setSingleStep(0.1)
+        self.left_wheel_spinbox.setProperty("value", 1.0)
         self.left_wheel_spinbox.setObjectName("left_wheel_spinbox")
         self.verticalLayout.addWidget(self.left_wheel_spinbox)
         self.left_wheel_slider = QtGui.QSlider(self.groupBox_2)
@@ -84,6 +86,7 @@ class Ui_MainWindow(object):
         self.right_wheel_spinbox.setMinimum(-10.0)
         self.right_wheel_spinbox.setMaximum(10.0)
         self.right_wheel_spinbox.setSingleStep(0.1)
+        self.right_wheel_spinbox.setProperty("value", 2.0)
         self.right_wheel_spinbox.setObjectName("right_wheel_spinbox")
         self.verticalLayout.addWidget(self.right_wheel_spinbox)
         self.right_wheel_slider = QtGui.QSlider(self.groupBox_2)
@@ -148,9 +151,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addItem(spacerItem1)
         self.gridLayout.addWidget(self.groupBox_3, 1, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtGui.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -160,8 +160,8 @@ class Ui_MainWindow(object):
         self.groupBox.setTitle(QtGui.QApplication.translate("MainWindow", "Simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.toggle_simulation.setText(QtGui.QApplication.translate("MainWindow", "Start", None, QtGui.QApplication.UnicodeUTF8))
         self.reset_simulation.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
-        self.sim_time_label.setText(QtGui.QApplication.translate("MainWindow", "5 Sim Steps per Second", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButton.setText(QtGui.QApplication.translate("MainWindow", "Graph...", None, QtGui.QApplication.UnicodeUTF8))
+        self.sim_time_label.setText(QtGui.QApplication.translate("MainWindow", "10 Sim Steps per Second", None, QtGui.QApplication.UnicodeUTF8))
+        self.graph_button.setText(QtGui.QApplication.translate("MainWindow", "Graph...", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox_2.setTitle(QtGui.QApplication.translate("MainWindow", "Forward Kinematics", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("MainWindow", "Left Wheel Speed (rev/s)", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Right Wheel Speed (rev/s)", None, QtGui.QApplication.UnicodeUTF8))

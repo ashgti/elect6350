@@ -6,6 +6,12 @@ from mainwindow import Ui_MainWindow
 
 from math import radians
 
+have_matplotlib = True
+try:
+    from plot import PlotWindow
+except ImportError:
+    have_matplotlib = False
+
 from homework2 import DifferentialKinematics
 
 class MainWindow(QtGui.QMainWindow):
@@ -25,9 +31,19 @@ class MainWindow(QtGui.QMainWindow):
         self.simulation_running = False
         self.current_time = 0.0
         
+        self.robot_xs = []
+        self.robot_ys = []
+        self.robot_ws = []
+        self.robot_times = []
+        self.graphing = False
+        self.plot_window = None
+        
         self.ui.setupUi(self)
         
         self.dk = DifferentialKinematics(0.30, 0.15, w=radians(self.ui.render_area.robot_rotation))
+        
+        self.onLeftWheelSpeedChanged(self.ui.left_wheel_spinbox.value())
+        self.onRightWheelSpeedChanged(self.ui.right_wheel_spinbox.value())
         
         self.connectComponents()
     
@@ -47,12 +63,24 @@ class MainWindow(QtGui.QMainWindow):
         
         self.ui.toggle_simulation.clicked.connect(self.toggleSimulation)
         self.ui.reset_simulation.clicked.connect(self.reset)
+        
+        self.ui.graph_button.clicked.connect(self.toggleGraphing)
     
     def simTimeEpoch(self):
         """Handle time update for simulation"""
         self.current_time += self.sim_period
         x,y,w = self.dk.stepSimulation(self.sim_period)
+        self.robot_xs.append(x)
+        self.robot_ys.append(y)
+        self.robot_ws.append(w)
+        self.robot_times.append(self.current_time)
+        self.updatePlots()
         self.ui.render_area.updateDisplay(x, y, w, self.current_time)
+    
+    def updatePlots(self):
+        """Updates the plt window if graphing"""
+        if self.graphing and self.plot_window != None:
+            self.plot_window.plotHeading(self.robot_ws, self.robot_times)
     
     def reset(self):
         """Resets the simualtion"""
@@ -60,10 +88,27 @@ class MainWindow(QtGui.QMainWindow):
             self.toggleSimulation()
         self.current_time = 0.0
         self.ui.render_area.reset()
-        self.dk = DifferentialKinematics(0.30, 0.15, w=radians(self.ui.render_area.robot_rotation))
+        self.dk = DifferentialKinematics(0.30, 0.15,
+                    w=radians(self.ui.render_area.robot_rotation))
         l = self.ui.left_wheel_spinbox.value()
         r = self.ui.right_wheel_spinbox.value()
         self.dk.forward(l, r)
+    
+    def toggleGraphing(self, event=None):
+        """Toggles the graphingon robot motion"""
+        if not have_matplotlib:
+            QtGui.QErrorMessage(self).showMessage("""You don't have matplotlib installed.  
+Get it here: http://sourceforge.net/projects/matplotlib/files/matplotlib/""")
+            return
+        if self.graphing:
+            self.graphing = False
+            self.plot_window = None
+        else:
+            self.plot_window = PlotWindow(self)
+            # self.plot_window.setWindowFlags(QtCore.Qt.Drawer)
+            self.plot_window.setWindowFlags(QtCore.Qt.Tool)
+            self.plot_window.show()
+            self.graphing = True
     
     def toggleSimulation(self, event=None):
         """Starts the simulation"""
