@@ -51,16 +51,23 @@ class Field(np.ndarray):
             size = obstacle.size
             self[origin[1]:origin[1]+size[1],origin[0]:origin[0]+size[0]] = -1.0
     
+    def get_cells_from_coordinates(self, coords):
+        """Returns a list of cell values given a set of cell coordinates"""
+        cell_values = []
+        for cell_coord in coords:
+            cell_values.append(self[cell_coord[1], cell_coord[0]])
+        return cell_values
+    
 
-def create_hw4_map():
+def create_hw4_map(scale = 1):
     """Creates a field with obstacles as defined by the homework"""
-    f = Field(10, 20)
+    f = Field(int(10*scale), int(20*scale))
     f.zero()
-    f.add_obstacle(3,3,3,3)
-    f.add_obstacle(5,9,3,3)
-    f.add_obstacle(4,16,3,3)
+    f.add_obstacle(int(3*scale),int(3*scale),int(3*scale),int(3*scale))
+    f.add_obstacle(int(5*scale),int(9*scale),int(3*scale),int(3*scale))
+    f.add_obstacle(int(4*scale),int(16*scale),int(3*scale),int(3*scale))
     f.set_start(1,1)
-    f.set_goal(10,20)
+    f.set_goal(int(10*scale),int(20*scale))
     return f
 
 if __name__ == '__main__':
