@@ -58,6 +58,12 @@ class Field(np.ndarray):
             cell_values.append(self[cell_coord[1], cell_coord[0]])
         return cell_values
     
+    def fill_cells(self, cells, value = 1):
+        """Fills the given cells with the given value"""
+        for cell in cells:
+            x, y = cell
+            self[y, x] = value # If this fails the coordinates are invalid on this field
+    
 
 def create_hw4_map(scale = 1):
     """Creates a field with obstacles as defined by the homework"""
