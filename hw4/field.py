@@ -55,6 +55,7 @@ class Field(np.ndarray):
 def create_hw4_map():
     """Creates a field with obstacles as defined by the homework"""
     f = Field(10, 20)
+    f.zero()
     f.add_obstacle(3,3,3,3)
     f.add_obstacle(5,9,3,3)
     f.add_obstacle(4,16,3,3)
