@@ -1,115 +1,56 @@
-from field import create_hw4_map
-import copy
-from numpy import zeros
-import time
+#!/usr/bin/env python
 
-INCLUDE_DIAG=True
+from costmap import Costmap2D
+from obstacle import Obstacle
 
-# def neighbors(f, wave_front, processed, p):
-#     if p[0]+1 < (f.height-0) and f[p[0]+1, p[1]] != -1 and (p[0]+1, p[1]) not in wave_front and (p[0]+1, p[1]) not in processed:
-#         wave_front.append((p[0]+1, p[1]))
-#     if p[0]-1 >= 0           and f[p[0]-1, p[1]] != -1 and (p[0]-1, p[1]) not in wave_front and (p[0]-1, p[1]) not in processed:
-#         wave_front.append((p[0]-1, p[1]))
-#     if p[1]+1 < (f.width-0)  and f[p[0], p[1]+1] != -1 and (p[0], p[1]+1) not in wave_front and (p[0], p[1]+1) not in processed:
-#         wave_front.append((p[0], p[1]+1))
-#     if p[1]-1 >= 0           and f[p[0], p[1]-1] != -1 and (p[0], p[1]-1) not in wave_front and (p[0], p[1]-1) not in processed:
-#         wave_front.append((p[0], p[1]-1))
-#     
-#     if INCLUDE_DIAG:
-#         # x+1, y+1
-#         if p[0]+1 < (f.height-0) and p[1]+1 < (f.width-0) and f[p[0]+1, p[1]+1] != -1 \
-#                 and (p[0]+1, p[1]+1) not in wave_front and (p[0]+1, p[1]+1) not in processed:
-#             wave_front.append((p[0]+1, p[1]))
-#         # x+1, y-1
-#         if p[0]+1 < (f.height-0) and p[1]-1 >= 0 and f[p[0]+1, p[1]-1] != -1 \
-#                 and (p[0]+1, p[1]-1) not in wave_front and (p[0]+1, p[1]-1) not in processed:
-#             wave_front.append((p[0]+1, p[1]-1))
-#         # x-1, y+1
-#         if p[0]-1 >= 0 and p[1]+1 < (f.width-0)  and f[p[0]-1, p[1]+1] != -1 \
-#                 and (p[0]-1, p[1]+1) not in wave_front and (p[0]-1, p[1]+1) not in processed:
-#             wave_ront.append((p[0]-1, p[1]+1))
-#         # x-1, y-1
-#         if p[0]-1 >= 0 and p[1]-1 >= 0 and f[p[0]-1, p[1]-1] != -1 \
-#                 and (p[0]-1, p[1]-1) not in wave_front and (p[0]-1, p[1]-1) not in processed:
-#             wave_front.append((p[0]-1, p[1]-1))
-
-def neighbors(f, wave_front, processed, p):
-    """Returns the neighbors of the given coordinate"""
-    (x, y) = p
-    if INCLUDE_DIAG:
-        possible_neighbors = [(x-1,y+1), (x,y+1), (x+1,y+1),
-                              (x-1,y),            (x+1,y),
-                              (x-1,y-1), (x,y-1), (x+1,y-1)]
-    else:
-        possible_neighbors = [           (x,y+1),
-                              (x-1,y),            (x+1,y),
-                                         (x,y-1)]
-    for pn in possible_neighbors:
-        if 0 <= pn[0] < f.height and 0 <= pn[1] < f.width and f[pn[0], pn[1]] == 0 and pn not in processed:
-            wave_front.add(pn)
-
-def brushfire(f, wave_front, processed):
-    current_distance=1
-    for x in wave_front:
-        f[x[0], x[1]] = current_distance
-    while len(wave_front) > 0:
-        current_wave_front = copy.copy(wave_front)
-        wave_front = set([])
-        current_distance = current_distance + 1
-        for p in current_wave_front:
-            neighbors(f, wave_front, processed, p)
-            # print len(processed), len(wave_front)
-            (x, y) = p
-            if INCLUDE_DIAG:
-                possible_neighbors = [(x-1,y+1), (x,y+1), (x+1,y+1),
-                                      (x-1,y),            (x+1,y),
-                                      (x-1,y-1), (x,y-1), (x+1,y-1)]
-            else:
-                possible_neighbors = [           (x,y+1),
-                                      (x-1,y),            (x+1,y),
-                                                 (x,y-1)]
-            for pn in possible_neighbors:
-                if 0 <= pn[0] < f.height and \
-                        0 <= pn[1] < f.width and \
-                        f[pn[0], pn[1]] == 0:
-                    f[pn[0], pn[1]] = current_distance
-                    processed.add(pn)
-
-def plot_performance():
-    """Calculates the run time for many map scales and plots the times vs the scales"""
-    scales = [1+0.25*x for x in range(30)]
-    times = []
-    for scale in scales:
-        f = create_hw4_map(scale)
-
-        f[0,0] = -1
-
-        if INCLUDE_DIAG:
-            f[1,0] = 1
-            f[0,1] = 1
-            f[1,1] = 1
-
-            wave_front = set([(1,0), (0,1), (1,1)])
-            processed = set([(0,0), (1,0), (0,1), (1,1)])
+class BrushfireExpansion(object):
+    """This class represents a brushfire style expansion algorithm"""
+    def __init__(self, costmap):
+        self.costmap = costmap
+        
+        self.ignition_cells = []
+        self.wave_front = []
+        
+        self.first_step = True
+    
+    def set_ignition_cells(self, ignition_cells):
+        """Sets the ignition cells, these are where the expansion should start from"""
+        if type(ignition_cells) != list: 
+            self.ignition_cells = [ignition_cells]
         else:
-            f[1,0] = 1
-            f[0,1] = 1
-
-            wave_front = set([(1,0), (0,1)])
-            processed = set([(0,0), (1,0), (0,1)])
-
-        import time
-        start = time.time()
-        brushfire(f, wave_front, processed)
-        t = time.time() - start
-        times.append(t)
-        print "Processing a field of size {}x{} took".format(f.width, f.height), t, "seconds"
-        print f
-    print times
-    from matplotlib.pyplot import plot, show
-    plot(scales, times)
-    show()
+            self.ignition_cells = ignition_cells
+    
+    def step_solution(self):
+        """This steps the solution, returns True if more work is required, otherwise False"""
+        if self.first_step:
+            self.first_step = False
+            for cell in self.ignition_cells:
+                self.costmap[cell[0], cell[1]] = 1
+                self.wave_front.append(cell)
+            return True
+        new_wave_front = []
+        for cell in self.wave_front:
+            neighbors = self.costmap.get_neighbors(cell[0], cell[1])
+            for neighbor in neighbors:
+                if self.costmap[neighbor[0],neighbor[1]] == 0.0:
+                    self.costmap[neighbor[0],neighbor[1]] = self.costmap[cell[0], cell[1]] + 1
+                    new_wave_front.append(neighbor)
+        if len(new_wave_front) == 0:
+            return False
+        self.wave_front = new_wave_front
+        return True
+    
+    def solve(self):
+        """Solves the expansion completely"""
+        while self.step_solution():
+            pass
 
 if __name__ == '__main__':
-    plot_performance()
-    
+    c = Costmap2D(10,20, resolution=0.5)
+    Obstacle(3,3,3,3).draw(c)
+    Obstacle(5,9,3,3).draw(c)
+    Obstacle(4,16,3,3).draw(c)
+    be = BrushfireExpansion(c)
+    be.set_ignition_cells([(0,0)])
+    be.solve()
+    print c

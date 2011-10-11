@@ -14,18 +14,24 @@ class Costmap2D(object):
     def __init__(self, width = 1, height = 1, dtype = 'int16', resolution = 1.0):
         self.width = int(width / float(resolution))
         self.height = int(height / float(resolution))
+        self.resolution = resolution
         if self.width <= 0 or self.height <= 0:
-            raise ValueError("Invalid width or height ({}x{}), less than zero."\
+            raise ValueError("Invalid width or height ({}x{}), less than or equal to zero."\
                                 .format(self.width,self.height))
         self.dtype = dtype
         self.data = np.zeros(self.width*self.height, dtype = dtype)
         self.data = self.data.reshape(self.width, self.height)
+        
+        self.neighbors = np.zeros(8, dtype=self.dtype)
     
     def __repr__(self):
         return self.__str__()
     
     def __str__(self):
-        return self.data.__str__()
+        # I transpose this to print out correctly
+        # order should be (col,row)/(x,y)/(e,n)/(l-r,u-d)
+        # but it is printed (row,col)/...
+        return self.data.T.__str__()
     
     def __getitem__(self, val):
         return self.data[val]
@@ -49,11 +55,27 @@ class Costmap2D(object):
                     count += 1
                 else:
                     cell_values.append(cell_value)
+        else:
+            print cell_coordinates
         return cell_values
+    
+    def get_neighbors(self, x, y):
+        """Returns the neighbors of the cell at the given x, y"""
+        neighbors = []
+        for y_ in [y-1, y, y+1]:
+            if y_ < 0 or y_ > self.height-1: # If Y coordinate is invalid
+                continue
+            for x_ in [x-1, x, x+1]:
+                if x_ == x and y_ == y: # If center
+                    continue
+                if x_ < 0 or x_ > self.width-1: # If X coordinate is invalid
+                    continue
+                neighbors.append((x_,y_))
+        return neighbors
     
 
 if __name__ == '__main__':
-    c = Costmap2D(10, 20, resolution=0.5)
+    c = Costmap2D(10, 20)
     print c[1,1]
     c[1,1] = -1
     print c[1,1]
@@ -63,3 +85,6 @@ if __name__ == '__main__':
     print c.get_cell_values([(1,1),(1,2),(1,3),(1,4)], return_numpy=False)
     print type(c.get_cell_values([(1,1),(1,2),(1,3),(1,4)], return_numpy=False))
     print c
+    print c.get_neighbors(0,0)
+    print c.get_neighbors(5,5)
+    print c.get_neighbors(9,19)

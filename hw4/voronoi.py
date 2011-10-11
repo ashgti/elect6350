@@ -1,134 +1,49 @@
-from field import Field, create_hw4_map
+#!/usr/bin/env python
 
-class Voronoi(object):
-    """Implementation of Voronoi"""
-    def __init__(self, field):
-        self.field = field
-        
-        self.border_cells = []
-        
-        self.first_step = True
+from brushfire import BrushfireExpansion
+
+from costmap import Costmap2D
+from obstacle import Obstacle
+
+class VoronoiExpansion(BrushfireExpansion):
+    """This class represents a Voronoi algorithm using a brushfire style expansion"""
+    def __init__(self, costmap):
+        BrushfireExpansion.__init__(self, costmap)
+        self.set_ignition_cells(self.get_boundry_cells())
     
-    def get_initial_border_cells(self):
-        """This returns the initial border cells"""
-        for (y, row) in enumerate(self.field):
-            for (x, cell) in enumerate(row):
+    def get_boundry_cells(self):
+        """This gets the cells around the perimeter of the map and from around the obstacles"""
+        boundry_cells = []
+        for (x, row) in enumerate(self.costmap):
+            for (y, cell) in enumerate(row):
                 # If cell has been set (!=0) don't process
                 if cell == 0.0:
                     # If it is on the edge of the map or If it touches an non-traversable
                     if self.on_edge(x,y) or \
-                       -1.0 in self.field.get_cells_from_coordinates(self.neighbors(x,y)):
-                        self.border_cells.append((x,y))
-        return self.border_cells
+                     -1.0 in self.costmap.get_cell_values(self.costmap.get_neighbors(x,y)):
+                        boundry_cells.append((x,y))
+        return boundry_cells
     
     def on_edge(self, x, y):
-        """returns true if the cell is on the edge of the map"""
-        temp = self.field[y, x] # If this fails the coordinates are invalid on this field
-        if x % self.field.width in [0, self.field.width-1]:
+        """Returns True if the cell at x,y is on the edge of the map, otherwise False"""
+        if x % self.costmap.width in [0, self.costmap.width-1]:
             return True
-        if y % self.field.height in [0, self.field.height-1]:
+        if y % self.costmap.height in [0, self.costmap.height-1]:
             return True
         return False
     
-    def neighbors(self, x, y):
-        """Returns the neighbors of the given coordinate"""
-        temp = self.field[y, x] # If this fails the coordinates are invalid on this field
-        neighbors = []
-        possible_neighbors = [(x-1,y+1), (x,y+1), (x+1,y+1),
-                              (x-1,y),            (x+1,y),
-                              (x-1,y-1), (x,y-1), (x+1,y-1)]
-        for pn in possible_neighbors:
-            if pn[0] >= self.field.width or pn[0] < 0:
-                continue
-            if pn[1] >= self.field.height or pn[1] < 0:
-                continue
-            neighbors.append(pn)
-        
-        return neighbors
-    
-    def step_solution(self):
-        """Steps the expansion of the voronoi solution"""
-        if self.first_step:
-            self.first_step = False
-            self.field.fill_cells(self.border_cells, 1)
-            return
-        new_borders = []
-        for cell in self.border_cells:
-            cell_value = self.field[cell[1], cell[0]]
-            for neighbor in self.neighbors(cell[0], cell[1]):
-                if self.field[neighbor[1], neighbor[0]] == 0.0 and neighbor not in self.border_cells:
-                    self.field[neighbor[1], neighbor[0]] = cell_value+1
-                    new_borders.append((neighbor[0], neighbor[1]))
-        self.border_cells = new_borders
-    
     def solve(self):
-        """Solves for the Voronoi diagram"""
-        # Loop until the costmap has been expanded
-        while len(self.border_cells) > 0:
-            self.step_solution()
-        
+        """Solves the voronoi algorithm"""
+        BrushfireExpansion.solve(self)
+        # Now extract the voronoi lines
+        # TODO: extract the voronoi lines
     
-
-def plot_performance():
-    """Calculates the run time for many map scales and plots the times vs the scales"""
-    scales = [1+0.25*x for x in range(30)]
-    times = []
-    for scale in scales:
-        f = create_hw4_map(scale)
-        
-        f[0,0] = -1
-        
-        v = Voronoi(f)
-        v.border_cells = v.neighbors(0,0)
-        
-        import time
-        start = time.time()
-        
-        v.solve()
-        
-        t = time.time() - start
-        times.append(t)
-        print "Processing a field of size {}x{} took".format(f.width, f.height), t, "seconds"
-        print f
-    print times
-    from matplotlib.pyplot import plot, show
-    plot(scales, times)
-    show()
-
-def run_hw4_voronoi():
-    """Runs the voronoi on the hw4 map"""
-    f = create_hw4_map(1)
-    
-    f[0,0] = -1
-    
-    v = Voronoi(f)
-    v.border_cells = v.neighbors(0,0)
-    v.solve()
-    
-    print f
-
-def run_only(scale=1, brushfire=False):
-    """Runs with no print"""
-    f = create_hw4_map(scale)
-    
-    f[0,0] = -1
-    
-    v = Voronoi(f)
-    if brushfire:
-        v.border_cells = v.neighbors(0,0)
-    else:
-        v.get_initial_border_cells()
-    v.solve()
-
-def profile():
-    """profiles the code"""
-    import cProfile
-    cProfile.run('run_only(8,True)')
 
 if __name__ == '__main__':
-    try:
-        # plot_performance()
-        profile()
-        # run_hw4_voronoi()
-    except:
-        import traceback; traceback.print_exc()
+    c = Costmap2D(10,20, resolution=0.5)
+    Obstacle(3,3,3,3).draw(c)
+    Obstacle(5,9,3,3).draw(c)
+    Obstacle(4,16,3,3).draw(c)
+    ve = VoronoiExpansion(c)
+    ve.solve()
+    print c
