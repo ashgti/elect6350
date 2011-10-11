@@ -6,7 +6,6 @@ class Voronoi(object):
         self.field = field
         
         self.border_cells = []
-        self.get_initial_border_cells()
         
         self.first_step = True
     
@@ -17,9 +16,9 @@ class Voronoi(object):
                 # If cell has been set (!=0) don't process
                 if cell == 0.0:
                     # If it is on the edge of the map or If it touches an non-traversable
-                    if self.on_edge(x,y) or -1.0 in self.neighbor_cells(x,y):
+                    if self.on_edge(x,y) or \
+                       -1.0 in self.field.get_cells_from_coordinates(self.neighbors(x,y)):
                         self.border_cells.append((x,y))
-                        # self.field[y,x] = 1
         return self.border_cells
     
     def on_edge(self, x, y):
@@ -46,11 +45,6 @@ class Voronoi(object):
             neighbors.append(pn)
         
         return neighbors
-    
-    def neighbor_cells(self,x,y):
-        """returns the neighboring cells"""
-        neighbors = self.neighbors(x,y)
-        return self.field.get_cells_from_coordinates(neighbors)
     
     def step_solution(self):
         """Steps the expansion of the voronoi solution"""
@@ -113,9 +107,28 @@ def run_hw4_voronoi():
     
     print f
 
+def run_only(scale=1, brushfire=False):
+    """Runs with no print"""
+    f = create_hw4_map(scale)
+    
+    f[0,0] = -1
+    
+    v = Voronoi(f)
+    if brushfire:
+        v.border_cells = v.neighbors(0,0)
+    else:
+        v.get_initial_border_cells()
+    v.solve()
+
+def profile():
+    """profiles the code"""
+    import cProfile
+    cProfile.run('run_only(8,True)')
+
 if __name__ == '__main__':
     try:
-        plot_performance()
+        # plot_performance()
+        profile()
         # run_hw4_voronoi()
     except:
         import traceback; traceback.print_exc()
