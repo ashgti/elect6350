@@ -53,4 +53,11 @@ if __name__ == '__main__':
     be = BrushfireExpansion(c)
     be.set_ignition_cells([(0,0)])
     be.solve()
-    print c
+    try:
+        from matplotlib.pylab import imshow, show
+        imshow(c.data.T, interpolation='nearest')
+        show()
+    except ImportError:
+        import sys
+        sys.stderr.write("You don't seem to have matplotlib, http://matplotlib.sourceforge.net/\n")
+        print c

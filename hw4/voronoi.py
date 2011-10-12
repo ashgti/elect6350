@@ -46,4 +46,11 @@ if __name__ == '__main__':
     Obstacle(4,16,3,3).draw(c)
     ve = VoronoiExpansion(c)
     ve.solve()
-    print c
+    try:
+        from matplotlib.pylab import imshow, show
+        imshow(c.data.T, interpolation='nearest')
+        show()
+    except ImportError:
+        import sys
+        sys.stderr.write("You don't seem to have matplotlib, http://matplotlib.sourceforge.net/\n")
+        print c

@@ -18,8 +18,15 @@ class Obstacle(object):
     
 
 if __name__ == '__main__':
-    c = Costmap2D(10,20)
+    c = Costmap2D(10,20,resolution=0.5)
     Obstacle(3,3,3,3).draw(c)
     Obstacle(5,9,3,3).draw(c)
     Obstacle(4,16,3,3).draw(c)
-    print c
+    try:
+        from matplotlib.pylab import imshow, show
+        imshow(c.data.T, interpolation='nearest')
+        show()
+    except ImportError:
+        import sys
+        sys.stderr.write("You don't seem to have matplotlib, http://matplotlib.sourceforge.net/\n")
+        print c

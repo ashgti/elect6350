@@ -23,6 +23,7 @@ class Costmap2D(object):
         self.data = self.data.reshape(self.width, self.height)
         
         self.neighbors = np.zeros(8, dtype=self.dtype)
+        self.on_update = None
     
     def __repr__(self):
         return self.__str__()
@@ -38,6 +39,8 @@ class Costmap2D(object):
     
     def __setitem__(self, key, val):
         self.data[key] = val
+        if self.on_update != None:
+            self.on_update(key, val)
     
     def get_cell_values(self, cell_coordinates, return_numpy=True):
         """Returns a list of costmap cell values given a list of coordinates"""
