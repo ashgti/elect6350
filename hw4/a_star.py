@@ -1,8 +1,8 @@
 import math
 import numpy as np
 import heapq
-from sys import maxint
 import collections
+import copy
 
 
 class Point(object):
@@ -173,29 +173,71 @@ if __name__ == '__main__':
     from costmap import Costmap2D
     from obstacle import Obstacle
     from matplotlib.pyplot import plot, show
-    from matplotlib.pylab import imshow, show
+    from matplotlib.pylab import imshow, show, figure
     import time
 
-    c = Costmap2D(10, 20, resolution=0.25)
+    c = Costmap2D(10, 20, resolution=0.2)
     c.goal = (c.width - 1, c.height - 1)
     c.start = (0, 0)
     Obstacle(3, 3, 2, 10).draw(c)
     Obstacle(5, 9, 3, 10).draw(c)
     Obstacle(0, 16, 6, 1).draw(c)
     Obstacle(6, 7, 4, 1).draw(c)
+    
+    d = copy.copy(c)
+    d.data = c.data.copy()
+    e = copy.copy(c)
+    e.data = c.data.copy()
 
     start = time.time()
-    r = a_star(c, c.start, c.goal, manhattan, True)
+    naive_r = a_star(c, c.start, c.goal, naive, True)
     end = time.time()
 
-    max_cell = c.data.max() * -1
+    print 'Naive:', end - start
+
+    start = time.time()
+    manhattan_r = a_star(d, d.start, d.goal, manhattan, True)
+    end = time.time()
+
+    print 'Manhattan:', end - start
+
+    start = time.time()
+    crow_r = a_star(e, e.start, e.goal, crow, True)
+    end = time.time()
+    
+    print 'Crow:', end - start
+
     # Sets the blocks of obstacles to a relatively distinct color
-    c.data[c.data == -1] = max_cell / 2
+    naive_max_cell = c.data.max() * -1
+    c.data[c.data == -1] = naive_max_cell / 2.0
+
+    manhattan_max_cell = d.data.max() * -1
+    d.data[d.data == -1] = manhattan_max_cell / 2.0
+
+    crow_max_cell = e.data.max() * -1
+    e.data[e.data == -1] = crow_max_cell / 2.0
 
     # Sets the line for the path to a very distinct color
-    for (x, y) in r:
-        c.data[x, y] = max_cell
+    for (x, y) in naive_r:
+        c.data[x, y] = naive_max_cell
 
-    print str(end - start) + "s"
-    imshow(c.data.T, interpolation='nearest')
+    for (x, y) in manhattan_r:
+        d.data[x, y] = manhattan_max_cell
+
+    for (x, y) in crow_r:
+        e.data[x, y] = crow_max_cell
+
+    fig = figure()
+    fig.subplots_adjust(hspace=0.01, wspace=0.01,
+                        bottom=0.07, top=1.0,
+                        left=0.04, right=1.0)
+    axes = fig.add_subplot(1, 3, 1)
+    axes.imshow(c.data.T, interpolation='nearest')
+    axes.set_title('Naive')
+    axes = fig.add_subplot(1, 3, 2)
+    axes.imshow(d.data.T, interpolation='nearest')
+    axes.set_title('Manhattan')
+    axes = fig.add_subplot(1, 3, 3)
+    axes.imshow(e.data.T, interpolation='nearest')
+    axes.set_title('Crow')
     show()
