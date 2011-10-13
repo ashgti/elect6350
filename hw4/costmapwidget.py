@@ -28,8 +28,12 @@ class Costmap2DFigure(FigureCanvas):
         # We want the axes cleared every time plot() is called
         self.axes.hold(False)
         
-        self.start = Rectangle((-0.5, -0.5), 1, 1, color='g')
-        self.goal = Rectangle((self.costmap.width-1.5, self.costmap.height-1.5), 1, 1, color='k')
+        self.show_start = True
+        self.start_coord = (-0.5, -0.5)
+        self.start = Rectangle(self.start_coord, 1, 1, color='g')
+        self.show_goal = True
+        self.goal_coord = (self.costmap.width-1.5, self.costmap.height-1.5)
+        self.goal = Rectangle(self.goal_coord, 1, 1, color='k')
         
         self.compute_initial_figure()
         
@@ -70,8 +74,10 @@ class Costmap2DFigure(FigureCanvas):
            -0.5 > coord[1] < self.costmap.height-1.5:
             return
         if e.button == 1:
+            self.start_coord = coord
             self.start = Rectangle(coord, 1, 1, color='g')
         elif e.button == 3:
+            self.goal_coord = coord
             self.goal = Rectangle(coord, 1, 1, color='k')
         else:
             return
@@ -96,8 +102,8 @@ class Costmap2DFigure(FigureCanvas):
     def on_map_update(self):
         """Slot to handle the costmap_changed signal"""
         self.axes.imshow(self.costmap.data.T, interpolation=self.interpolation)
-        self.axes.add_artist(self.start)
-        self.axes.add_artist(self.goal)
+        if self.show_start: self.axes.add_artist(self.start)
+        if self.show_goal: self.axes.add_artist(self.goal)
         self.draw()
         self.idle = True
     
