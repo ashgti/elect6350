@@ -63,7 +63,7 @@ class Costmap2D(object):
         return cell_values
     
     def get_neighbors(self, x, y):
-        """Returns the neighbors of the cell at the given x, y"""
+        """Returns the 8 directional neighbors of the cell at the given x, y"""
         neighbors = []
         for y_ in [y-1, y, y+1]:
             if y_ < 0 or y_ > self.height-1: # If Y coordinate is invalid
@@ -75,6 +75,13 @@ class Costmap2D(object):
                     continue
                 neighbors.append((x_,y_))
         return neighbors
+    
+    def get_cardinals(self, x, y):
+        """Returns the N, S, E, W neighbors of the cell at the given x, y"""
+        return [(x, y) for x, y in zip([x+1, x, x-1, x],\
+                                       [y, y+1, y, y-1])\
+                           if  0 <= x < self.width \
+                           and 0 <= y < self.height]
     
 
 if __name__ == '__main__':
@@ -91,3 +98,6 @@ if __name__ == '__main__':
     print c.get_neighbors(0,0)
     print c.get_neighbors(5,5)
     print c.get_neighbors(9,19)
+    print c.get_cardinals(0,0)
+    print c.get_cardinals(5,5)
+    print c.get_cardinals(9,19)
