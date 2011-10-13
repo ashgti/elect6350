@@ -19,10 +19,13 @@ class Point(object):
         self.y = y
         self.f_score = f_score
 
+    def __str__(self):
+        return str((self.f_score[(self.x, self.y)], (self.x, self.y)))
+
     def __cmp__(self, other):
         """
         Compares a Point to another point or a tuple (x, y).
-        
+
         TODO(ash_gti): Check this. It seems off...
         """
         my_pos = (self.x, self.y)
@@ -33,11 +36,9 @@ class Point(object):
             other_pos = other
             if self.x == other[0] and self.y == other[1]:
                 return 0
-            elif dist_between((other[0], other[1]), self.f.goal)\
-               > dist_between((self.x, self.y), self.f.goal):
-                return -1
             else:
-                return 1
+                return cmp(dist_between((self.x, self.y), self.f.goal),
+                           dist_between((other[0], other[1]), self.f.goal))
         else:
             other_pos = (other.x, other.y)
             tenative = cmp(self.f_score[my_pos], self.f_score[other_pos])
@@ -47,13 +48,12 @@ class Point(object):
                 if self.x == other.x and \
                         self.y == other.y:
                     return 0
-                elif dist_between((other.x, other.y), self.f.goal)\
-                        > dist_between((self.x, self.y), self.f.goal):
-                    return -1
                 else:
-                    return 1
+                    return cmp(dist_between((self.x, self.y), self.f.goal),
+                               dist_between((other.x, other.y), self.f.goal))
             else:
                 return tenative
+
 
 def dist_between(point_a, point_b):
     """
@@ -67,8 +67,22 @@ def dist_between(point_a, point_b):
     return result
 
 
-def a_star(field, start, goal, heuristic_cost_estimate, diagonal=True):
-    "A function that returns a path as a list of coordinates"
+def a_star(field, start, goal, heuristic_cost_estimate, neighbors_fn=None):
+    """
+    A function that returns a path as a list of coordinates.
+
+    field = A representation of the playing field or graph.
+    start = The starting position
+    goal  = The target position
+    heuristic_cost_estimate = A function to estimate the cost of moving into
+                              a neighboring cell.
+    neighbors_fn = None | A function to get neighbors of a point.
+
+    return = A list of points that make up a path.
+    """
+    if neighbors_fn == None:
+        neighbors_fn = field.get_neighbors
+
     width = field.width
     height = field.height
 
@@ -111,11 +125,8 @@ def a_star(field, start, goal, heuristic_cost_estimate, diagonal=True):
             return path
 
         closedset.add(x)
-        if diagonal:
-            neighbors = field.get_neighbors(*x)
-        else:
-            neighbors = field.get_cardinals(*x)
-        for y in neighbors:
+        for y in neighbors_fn(*x):
+            # If the value is in the closedset we don't need to revisit it
             if y in closedset:
                 continue
             if field[y] == -1:
@@ -144,14 +155,14 @@ def a_star(field, start, goal, heuristic_cost_estimate, diagonal=True):
 def crow(f, cell0, cell1):
     "A hypotense of a triangle."
     return math.sqrt((cell1[0] - cell0[0]) ** 2 + \
-                     (cell1[1] - cell0[1]) ** 2) * 10
+                     (cell1[1] - cell0[1]) ** 2)
 
 
 def manhattan(f, cell0, cell1):
     """
     Calculate the manhattan distance.
     """
-    return (abs(cell1[0] - cell0[0]) + abs(cell1[1] - cell0[1])) * 10
+    return (abs(cell1[0] - cell0[0]) + abs(cell1[1] - cell0[1]))
 
 
 def naive(f, cell0, cell1):
@@ -181,32 +192,32 @@ if __name__ == '__main__':
     c = Costmap2D(10, 20, resolution=0.5)
     c.goal = (c.width - 1, c.height - 1)
     c.start = (0, 0)
-    Obstacle(3, 3, 2, 10).draw(c)
-    Obstacle(5, 9, 3, 10).draw(c)
-    Obstacle(0, 16, 6, 1).draw(c)
-    Obstacle(6, 7, 4, 1).draw(c)
-    
+    Obstacle(3, 1, 2, 10).draw(c)
+    # Obstacle(5, 9, 3, 10).draw(c)
+    Obstacle(1, 12, 6, 1).draw(c)
+    Obstacle(6, 14, 4, 1).draw(c)
+
     d = copy.copy(c)
     d.data = c.data.copy()
     e = copy.copy(c)
     e.data = c.data.copy()
 
     start = time.time()
-    naive_r = a_star(c, c.start, c.goal, naive, True)
+    naive_r = a_star(c, c.start, c.goal, naive)
     end = time.time()
 
     print 'Naive:', end - start
 
     start = time.time()
-    manhattan_r = a_star(d, d.start, d.goal, manhattan, True)
+    manhattan_r = a_star(d, d.start, d.goal, manhattan)
     end = time.time()
 
     print 'Manhattan:', end - start
 
     start = time.time()
-    crow_r = a_star(e, e.start, e.goal, crow, True)
+    crow_r = a_star(e, e.start, e.goal, crow)
     end = time.time()
-    
+
     print 'Crow:', end - start
 
     # Sets the blocks of obstacles to a relatively distinct color
