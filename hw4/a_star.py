@@ -136,7 +136,7 @@ def a_star(field, start, goal, heuristic_cost_estimate, neighbors_fn=None):
             if y not in openset:
                 heapq.heappush(openset, Point(field, f_score, *y))
                 tentative_is_better = True
-            elif tentative_g_score > g_score[y]:
+            elif tentative_g_score < g_score[y]:
                 tentative_is_better = True
             else:
                 tentative_is_better = False
