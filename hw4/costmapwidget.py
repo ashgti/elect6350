@@ -10,6 +10,7 @@ import os; os.environ['QT_API'] = 'pyside'
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.patches import Circle, Rectangle
 from matplotlib.pylab import imshow
 
 from costmap import Costmap2D
@@ -22,15 +23,20 @@ class Costmap2DFigure(FigureCanvas):
     def __init__(self, costmap, parent=None, width=5.0, height=4.0, dpi=100, interpolation='nearest'):
         self.costmap = costmap
         self.interpolation = interpolation
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.add_subplot(111)
         # We want the axes cleared every time plot() is called
         self.axes.hold(False)
         
+        self.start = Rectangle((-0.5, -0.5), 1, 1, color='g')
+        self.goal = Rectangle((self.costmap.width-1.5, self.costmap.height-1.5), 1, 1, color='k')
+        
         self.compute_initial_figure()
         
-        FigureCanvas.__init__(self, fig)
+        FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
+        
+        self.mpl_connect('pick_event', self.on_pick)
         
         FigureCanvas.setSizePolicy(self,
                                    QtGui.QSizePolicy.Expanding,
@@ -47,6 +53,10 @@ class Costmap2DFigure(FigureCanvas):
         # Override costmap on change
         self.costmap.on_update = self.costmap_update_callback
     
+    def on_pick(self, pick_event):
+        """Gets called when an object is picked"""
+        print pick_event
+    
     def connect_stuff(self):
         """Make Qt connections"""
         self.costmap_changed.connect(self.on_map_update)
@@ -60,10 +70,14 @@ class Costmap2DFigure(FigureCanvas):
     def compute_initial_figure(self):
         """Plot the imshow"""
         self.axes.imshow(self.costmap.data.T, interpolation=self.interpolation)
+        self.axes.add_artist(self.start)
+        self.axes.add_artist(self.goal)
     
     def on_map_update(self):
         """Slot to handle the costmap_changed signal"""
-        self.imshow = self.axes.imshow(self.costmap.data.T, interpolation=self.interpolation)
+        self.axes.imshow(self.costmap.data.T, interpolation=self.interpolation)
+        self.axes.add_artist(self.start)
+        self.axes.add_artist(self.goal)
         self.draw()
         self.idle = True
     
@@ -106,7 +120,7 @@ def _run_voronoi_expansion(c):
 
 if __name__ == '__main__':
     try:
-        c = Costmap2D(20,20,resolution=0.1)
+        c = Costmap2D(10,20,resolution=1.0)
         Obstacle(3,3,3,3).draw(c)
         Obstacle(5,9,3,3).draw(c)
         Obstacle(4,16,3,3).draw(c)
