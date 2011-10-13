@@ -147,15 +147,15 @@ def a_star(field, start, goal, heuristic_cost_estimate, neighbors_fn=None):
                 h_score[y] = heuristic_cost_estimate(field, y, goal)
                 f_score[y] = g_score[y] + h_score[y]
                 field[y] = f_score[y]
-    return None
+    return []
 
 
 # 3 distinct heuristics
 # I include the field incase future heuristics need to access values from it.
 def crow(f, cell0, cell1):
     "A hypotense of a triangle."
-    return math.sqrt((cell1[0] - cell0[0]) ** 2 + \
-                     (cell1[1] - cell0[1]) ** 2)
+    return math.sqrt((cell1[0] - cell0[0]) ** 2.0 + \
+                     (cell1[1] - cell0[1]) ** 2.0)
 
 
 def manhattan(f, cell0, cell1):
@@ -189,13 +189,13 @@ if __name__ == '__main__':
     from matplotlib.pylab import imshow, show, figure
     import time
 
-    c = Costmap2D(10, 20, resolution=0.5)
+    c = Costmap2D(20, 20, resolution=0.25)
     c.goal = (c.width - 1, c.height - 1)
     c.start = (0, 0)
-    Obstacle(3, 1, 2, 10).draw(c)
-    # Obstacle(5, 9, 3, 10).draw(c)
-    Obstacle(1, 12, 6, 1).draw(c)
-    Obstacle(6, 14, 4, 1).draw(c)
+    # Obstacle(3, 1, 2, 10).draw(c)
+    # Obstacle(2, 9, 3, 10).draw(c)
+    Obstacle(13, 3, 1, 11).draw(c)
+    Obstacle(6, 14, 8, 1).draw(c)
 
     d = copy.copy(c)
     d.data = c.data.copy()
