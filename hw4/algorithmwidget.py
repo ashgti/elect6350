@@ -13,6 +13,8 @@ DEFAULT_RESOLUTION = 1.0
 
 DEFAULT_TIMEOUT = 0.1
 
+DEFAULT_DELAY = 0.05
+
 class AlgorithmWidget(QtGui.QGroupBox):
     toggle_running_button_state = QtCore.Signal(bool)
     algorithm_finished = QtCore.Signal(bool)
@@ -76,7 +78,6 @@ class AlgorithmWidget(QtGui.QGroupBox):
     
     def run_algorithm(self):
         """Runs the algorithm"""
-        self.reset_algorithm()
         while self.running:
             self.step_event.wait(DEFAULT_TIMEOUT)
             if self.step_event.is_set():
@@ -86,8 +87,11 @@ class AlgorithmWidget(QtGui.QGroupBox):
                 if not result:
                     self.algorithm_finished.emit(False)
                     self.running = False
+                    print 'Algorithm done'
                 if self.stepping:
                     self.step_event.clear()
+                else:
+                    import time; time.sleep(DEFAULT_DELAY)
     
     def setup_algorithm(self):
         """Override this"""
@@ -116,6 +120,7 @@ class AlgorithmWidget(QtGui.QGroupBox):
     def start_threading(self):
         """Starts the algorithm thread"""
         if self.algorithm_thread == None:
+            self.reset_algorithm()
             self.algorithm_thread = Thread(target=self.run_algorithm)
             self.running = True
             self.algorithm_thread.start()

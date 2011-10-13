@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+from math import floor
 
 from PySide import QtCore, QtGui
 
@@ -10,6 +11,12 @@ from obstacle import Obstacle
 from brushfire import BrushfireExpansion
 from algorithmwidget import AlgorithmWidget
 
+DEFAULT_WIDTH = 10
+DEFAULT_HEIGHT = 20
+DEFAULT_RESOLUTION = 1.0
+
+DEFAULT_TIMEOUT = 0.1
+
 class BrushfireAlgorithmWidget(AlgorithmWidget):
     def __init__(self, parent = None):
         AlgorithmWidget.__init__(self, "Brushfire Algorithm", parent)
@@ -18,28 +25,41 @@ class BrushfireAlgorithmWidget(AlgorithmWidget):
     
     def setup_algorithm(self):
         """Sets up the algorithm"""
+        print 'Setting up BE'
         self.costmap = Costmap2D(DEFAULT_WIDTH, DEFAULT_HEIGHT, resolution=DEFAULT_RESOLUTION)
         Obstacle(3,3,3,3).draw(self.costmap)
         Obstacle(5,9,3,3).draw(self.costmap)
         Obstacle(4,16,3,3).draw(self.costmap)
         
-        self.costmap_widget = Costmap2DWidget(self.costmap, parent = self)
+        self.costmap_widget = Costmap2DWidget(self.costmap, parent = self, show_goal = False)
+        self.costmap_widget.canvas.show_start = True
+        self.costmap_widget.canvas.show_goal = False
         self.be = BrushfireExpansion(self.costmap)
-        self.be.set_ignition_cells([self.costmap_widget.start_coord])
+        temp = self.costmap_widget.canvas.start_coord
+        self.start_coord = (floor(temp[0]+0.5), floor(temp[1]+0.5))
+        self.be.set_ignition_cells([self.start_coord])
     
     def step_solution(self):
         """Steps the solution"""
-        pass
+        print 'Stepping BE'
+        result = self.be.step_solution()
+        return result
     
     def reset_algorithm(self):
         """Resets the algorithm"""
-        self.costmap = Costmap2D(DEFAULT_WIDTH, DEFAULT_HEIGHT, resolution=DEFAULT_RESOLUTION)
+        print 'Resetting BE'
+        self.costmap_widget.canvas.freeze = True
+        self.costmap[:] = 0.0
         Obstacle(3,3,3,3).draw(self.costmap)
         Obstacle(5,9,3,3).draw(self.costmap)
         Obstacle(4,16,3,3).draw(self.costmap)
         
         self.be = BrushfireExpansion(self.costmap)
-        self.be.set_ignition_cells([self.costmap_widget.start_coord])
+        temp = self.costmap_widget.canvas.start_coord
+        self.start_coord = (floor(temp[0]+0.5), floor(temp[1]+0.5))
+        self.be.set_ignition_cells([self.start_coord])
+        self.costmap_widget.canvas.freeze = False
+        self.costmap_widget.canvas.on_map_update()
     
 
 class Homework4App(QtGui.QWidget):
@@ -48,8 +68,7 @@ class Homework4App(QtGui.QWidget):
         
         self.algorithms = []
         
-        example = AlgorithmWidget(parent=self)
-        example.pack_buttons()
+        example = BrushfireAlgorithmWidget(parent=self)
         self.algorithms.append(example)
         
         layout = QtGui.QHBoxLayout()
