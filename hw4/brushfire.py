@@ -44,6 +44,7 @@ class BrushfireExpansion(object):
         """Solves the expansion completely"""
         while self.step_solution():
             pass
+    
 
 if __name__ == '__main__':
     c = Costmap2D(10,20, resolution=0.5)

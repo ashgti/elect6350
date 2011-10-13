@@ -189,13 +189,14 @@ if __name__ == '__main__':
     from matplotlib.pylab import imshow, show, figure
     import time
 
-    c = Costmap2D(20, 20, resolution=0.5)
-    c.goal = (c.width - 1, 0)
-    c.start = (0, c.height - 1)
-    Obstacle(2, 2, 1, 4).draw(c)
-    Obstacle(2, 2, 8, 1).draw(c)
-    Obstacle(16, 3, 1, 11).draw(c)
-    Obstacle(6, 14, 11, 1).draw(c)
+    c = Costmap2D(20, 20, resolution=0.25)
+    c.goal = (c.width - 1, c.height - 1)
+    c.start = (0, 0)
+
+    Obstacle(3, 1, 2, 10).draw(c)
+    Obstacle(2, 9, 3, 10).draw(c)
+    Obstacle(1, 12, 6, 1).draw(c)
+    Obstacle(6, 14, 4, 1).draw(c)
 
     d = copy.copy(c)
     d.data = c.data.copy()

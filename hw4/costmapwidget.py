@@ -21,12 +21,12 @@ class Costmap2DFigure(FigureCanvas):
     
     """Implements an imshow figure for showing the costmap2d"""
     def __init__(self, costmap, parent=None, width=5.0, height=4.0, dpi=100, interpolation='nearest',
-                    show_start = True, show_goal = True):
+                    show_start = True, show_goal = True, show_colorbar = True):
         self.costmap = costmap
         self.freeze = False
         self.interpolation = interpolation
         self.fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = self.fig.add_subplot(111)
+        self.axes = self.fig.add_subplot(1,1,1)
         # We want the axes cleared every time plot() is called
         self.axes.hold(False)
         
@@ -36,6 +36,7 @@ class Costmap2DFigure(FigureCanvas):
         self.show_goal = show_goal
         self.goal_coord = (self.costmap.width-1.5, self.costmap.height-1.5)
         self.goal = Rectangle(self.goal_coord, 1, 1, color='k')
+        self.show_colorbar = show_colorbar
         
         self.compute_initial_figure()
         
@@ -97,14 +98,19 @@ class Costmap2DFigure(FigureCanvas):
     
     def compute_initial_figure(self):
         """Plot the imshow"""
-        self.axes.imshow(self.costmap.data.T, interpolation=self.interpolation)
+        axes = self.axes.imshow(self.costmap.data.T, interpolation=self.interpolation)
+        if self.show_colorbar: self.colorbar = self.fig.colorbar(axes)
         if self.show_start: self.axes.add_artist(self.start)
         if self.show_goal: self.axes.add_artist(self.goal)
     
     def on_map_update(self):
         """Slot to handle the costmap_changed signal"""
         if self.freeze: return
-        self.axes.imshow(self.costmap.data.T, interpolation=self.interpolation)
+        axes = self.axes.imshow(self.costmap.data.T, interpolation=self.interpolation)
+        if self.show_colorbar:
+            self.fig.delaxes(self.fig.axes[1])
+            self.fig.subplots_adjust(right=0.90)
+            self.colorbar = self.fig.colorbar(axes)
         if self.show_start: self.axes.add_artist(self.start)
         if self.show_goal: self.axes.add_artist(self.goal)
         self.draw()
@@ -113,12 +119,14 @@ class Costmap2DFigure(FigureCanvas):
 
 class Costmap2DWidget(QtGui.QWidget):
     """Implements a widget that will display a costmap figure with a toolbar"""
-    def __init__(self, costmap, parent = None, show_start = True, show_goal = True):
+    def __init__(self, costmap, parent = None, show_start = True, show_goal = True, 
+                    show_colorbar = True):
         QtGui.QWidget.__init__(self, parent)
         self.costmap = costmap
         
         # Setup display
-        self.canvas = Costmap2DFigure(costmap, show_start = show_start, show_goal = show_goal)
+        self.canvas = Costmap2DFigure(costmap, show_start = show_start, show_goal = show_goal, 
+                        show_colorbar = show_colorbar)
         self.toolbar = NavigationToolbar(self.canvas, self)
         
         # Setup layout
