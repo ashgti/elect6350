@@ -40,15 +40,20 @@ class Point(object):
                 return 1
         else:
             other_pos = (other.x, other.y)
-            # if self.x == other.x and \
-            #         self.y == other.y:
-            #     return 0
-            # elif dist_between((other.x, other.y), self.f.goal)\
-            #         > dist_between((self.x, self.y), self.f.goal):
-            #     return -1
-            # else:
-            #     return 1
-            return cmp(self.f_score[my_pos], self.f_score[other_pos])
+            tenative = cmp(self.f_score[my_pos], self.f_score[other_pos])
+            if tenative == 0:
+                # If the two points have the same score, get the closest
+                # to the goal.
+                if self.x == other.x and \
+                        self.y == other.y:
+                    return 0
+                elif dist_between((other.x, other.y), self.f.goal)\
+                        > dist_between((self.x, self.y), self.f.goal):
+                    return -1
+                else:
+                    return 1
+            else:
+                return tenative
 
 def dist_between(point_a, point_b):
     """
@@ -97,15 +102,12 @@ def a_star(field, start, goal, heuristic_cost_estimate, diagonal=True):
         current_node = heapq.heappop(openset)
         x = (current_node.x, current_node.y)
 
-        # if c > 200:
-            # imshow(field.data.T, interpolation='nearest')
-            # show()
-
         if x == goal:
-            print c
+            print "Total Loops:", c
             path = reconstruct_path(came_from, came_from[goal])
             path.append(goal)
-            print len(path)
+            print "Path Length:", len(path)
+            print "Path Cost:", sum([f_score[x] for p in path])
             return path
 
         closedset.add(x)
@@ -176,7 +178,7 @@ if __name__ == '__main__':
     from matplotlib.pylab import imshow, show, figure
     import time
 
-    c = Costmap2D(10, 20, resolution=0.2)
+    c = Costmap2D(10, 20, resolution=0.5)
     c.goal = (c.width - 1, c.height - 1)
     c.start = (0, 0)
     Obstacle(3, 3, 2, 10).draw(c)
@@ -218,14 +220,21 @@ if __name__ == '__main__':
     e.data[e.data == -1] = crow_max_cell / 2.0
 
     # Sets the line for the path to a very distinct color
+    # max_counter makes the line change colors as it reaches the goal
+    max_counter = 0
     for (x, y) in naive_r:
-        c.data[x, y] = naive_max_cell
+        max_counter += 1
+        c.data[x, y] = naive_max_cell - max_counter
 
+    max_counter = 0
     for (x, y) in manhattan_r:
-        d.data[x, y] = manhattan_max_cell
+        max_counter += 1
+        d.data[x, y] = manhattan_max_cell - max_counter
 
+    max_counter = 0
     for (x, y) in crow_r:
-        e.data[x, y] = crow_max_cell
+        max_counter += 1
+        e.data[x, y] = crow_max_cell - max_counter
 
     fig = figure()
     fig.subplots_adjust(hspace=0.01, wspace=0.01,
