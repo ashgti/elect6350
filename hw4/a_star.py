@@ -193,7 +193,7 @@ if __name__ == '__main__':
     c.goal = (c.width - 1, c.height - 1)
     c.start = (0, 0)
     Obstacle(3, 1, 2, 10).draw(c)
-    # Obstacle(5, 9, 3, 10).draw(c)
+    Obstacle(2, 9, 3, 10).draw(c)
     Obstacle(1, 12, 6, 1).draw(c)
     Obstacle(6, 14, 4, 1).draw(c)
 
