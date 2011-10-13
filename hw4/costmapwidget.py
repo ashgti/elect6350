@@ -20,16 +20,22 @@ class Costmap2DFigure(FigureCanvas):
     costmap_changed = QtCore.Signal()
     
     """Implements an imshow figure for showing the costmap2d"""
-    def __init__(self, costmap, parent=None, width=5.0, height=4.0, dpi=100, interpolation='nearest'):
+    def __init__(self, costmap, parent=None, width=5.0, height=4.0, dpi=100, interpolation='nearest',
+                    show_start = True, show_goal = True):
         self.costmap = costmap
+        self.freeze = False
         self.interpolation = interpolation
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = self.fig.add_subplot(111)
         # We want the axes cleared every time plot() is called
         self.axes.hold(False)
         
-        self.start = Rectangle((-0.5, -0.5), 1, 1, color='g')
-        self.goal = Rectangle((self.costmap.width-1.5, self.costmap.height-1.5), 1, 1, color='k')
+        self.show_start = show_start
+        self.start_coord = (-0.5, -0.5)
+        self.start = Rectangle(self.start_coord, 1, 1, color='g')
+        self.show_goal = show_goal
+        self.goal_coord = (self.costmap.width-1.5, self.costmap.height-1.5)
+        self.goal = Rectangle(self.goal_coord, 1, 1, color='k')
         
         self.compute_initial_figure()
         
@@ -70,8 +76,10 @@ class Costmap2DFigure(FigureCanvas):
            -0.5 > coord[1] < self.costmap.height-1.5:
             return
         if e.button == 1:
+            self.start_coord = coord
             self.start = Rectangle(coord, 1, 1, color='g')
         elif e.button == 3:
+            self.goal_coord = coord
             self.goal = Rectangle(coord, 1, 1, color='k')
         else:
             return
@@ -90,26 +98,27 @@ class Costmap2DFigure(FigureCanvas):
     def compute_initial_figure(self):
         """Plot the imshow"""
         self.axes.imshow(self.costmap.data.T, interpolation=self.interpolation)
-        self.axes.add_artist(self.start)
-        self.axes.add_artist(self.goal)
+        if self.show_start: self.axes.add_artist(self.start)
+        if self.show_goal: self.axes.add_artist(self.goal)
     
     def on_map_update(self):
         """Slot to handle the costmap_changed signal"""
+        if self.freeze: return
         self.axes.imshow(self.costmap.data.T, interpolation=self.interpolation)
-        self.axes.add_artist(self.start)
-        self.axes.add_artist(self.goal)
+        if self.show_start: self.axes.add_artist(self.start)
+        if self.show_goal: self.axes.add_artist(self.goal)
         self.draw()
         self.idle = True
     
 
 class Costmap2DWidget(QtGui.QWidget):
     """Implements a widget that will display a costmap figure with a toolbar"""
-    def __init__(self, costmap, parent = None):
+    def __init__(self, costmap, parent = None, show_start = True, show_goal = True):
         QtGui.QWidget.__init__(self, parent)
         self.costmap = costmap
         
         # Setup display
-        self.canvas = Costmap2DFigure(costmap)
+        self.canvas = Costmap2DFigure(costmap, show_start = show_start, show_goal = show_goal)
         self.toolbar = NavigationToolbar(self.canvas, self)
         
         # Setup layout

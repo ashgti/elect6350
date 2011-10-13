@@ -1,65 +1,75 @@
 #!/usr/bin/env python
 
 import sys
-from copy import copy
+from math import floor
 
 from PySide import QtCore, QtGui
 
 from costmap import Costmap2D
+from costmapwidget import Costmap2DWidget
 from obstacle import Obstacle
 from brushfire import BrushfireExpansion
-from costmapwidget import Costmap2DWidget
+from algorithmwidget import AlgorithmWidget
 
 DEFAULT_WIDTH = 10
 DEFAULT_HEIGHT = 20
 DEFAULT_RESOLUTION = 1.0
 
-class AlgorithmWidget(QtGui.QGroupBox):
-    def __init__(self, name="Unnamed Algorithm", parent=None):
-        QtGui.QGroupBox.__init__(self, name, parent=parent)
+DEFAULT_TIMEOUT = 0.1
+
+class BrushfireAlgorithmWidget(AlgorithmWidget):
+    def __init__(self, parent = None):
+        AlgorithmWidget.__init__(self, "Brushfire Algorithm", parent)
         
+        self.pack_buttons()
+    
+    def setup_algorithm(self):
+        """Sets up the algorithm"""
+        print 'Setting up BE'
         self.costmap = Costmap2D(DEFAULT_WIDTH, DEFAULT_HEIGHT, resolution=DEFAULT_RESOLUTION)
         Obstacle(3,3,3,3).draw(self.costmap)
         Obstacle(5,9,3,3).draw(self.costmap)
         Obstacle(4,16,3,3).draw(self.costmap)
         
-        self.costmap_widget = Costmap2DWidget(self.costmap, parent = self)
-        
-        self.run_button = QtGui.QPushButton("Run")
-        self.step_button = QtGui.QPushButton("Step")
-        self.reset_button = QtGui.QPushButton("Reset")
-        self.buttons = [self.run_button, self.step_button, self.reset_button]
-        
-        self.make_connections()
+        self.costmap_widget = Costmap2DWidget(self.costmap, parent = self, show_goal = False)
+        self.costmap_widget.canvas.show_start = True
+        self.costmap_widget.canvas.show_goal = False
+        self.be = BrushfireExpansion(self.costmap)
+        temp = self.costmap_widget.canvas.start_coord
+        self.start_coord = (floor(temp[0]+0.5), floor(temp[1]+0.5))
+        self.be.set_ignition_cells([self.start_coord])
     
-    def make_connections(self):
-        """Makes the Qt connections"""
-        self.run_button.clicked.connect(self.on_run_clicked)
+    def step_solution(self):
+        """Steps the solution"""
+        print 'Stepping BE'
+        result = self.be.step_solution()
+        return result
     
-    @QtCore.Slot()
-    def on_run_clicked(self):
-        """Called when run is clicked"""
-        print '(run button) implement me!'
-    
-    def pack_buttons(self):
-        """Puts the buttons into the layout, this lets additional buttons to be inserted"""
-        button_layout = QtGui.QHBoxLayout()
-        for button in self.buttons:
-            button_layout.addWidget(button)
+    def reset_algorithm(self):
+        """Resets the algorithm"""
+        print 'Resetting BE'
+        self.costmap_widget.canvas.freeze = True
+        self.costmap[:] = 0.0
+        Obstacle(3,3,3,3).draw(self.costmap)
+        Obstacle(5,9,3,3).draw(self.costmap)
+        Obstacle(4,16,3,3).draw(self.costmap)
         
-        layout = QtGui.QVBoxLayout()
-        layout.addWidget(self.costmap_widget)
-        layout.addLayout(button_layout)
-        layout.addStretch(1)
-        self.setLayout(layout)
+        self.be = BrushfireExpansion(self.costmap)
+        temp = self.costmap_widget.canvas.start_coord
+        self.start_coord = (floor(temp[0]+0.5), floor(temp[1]+0.5))
+        self.be.set_ignition_cells([self.start_coord])
+        self.costmap_widget.canvas.freeze = False
+        self.costmap_widget.canvas.on_map_update()
     
 
 class Homework4App(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         
-        example = AlgorithmWidget(parent=self)
-        example.pack_buttons()
+        self.algorithms = []
+        
+        example = BrushfireAlgorithmWidget(parent=self)
+        self.algorithms.append(example)
         
         layout = QtGui.QHBoxLayout()
         layout.addWidget(example)
