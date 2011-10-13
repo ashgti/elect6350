@@ -42,17 +42,18 @@ class Point(object):
         else:
             other_pos = (other.x, other.y)
             tenative = cmp(self.f_score[my_pos], self.f_score[other_pos])
-            if tenative == 0:
-                # If the two points have the same score, get the closest
-                # to the goal.
-                if self.x == other.x and \
-                        self.y == other.y:
-                    return 0
-                else:
-                    return cmp(dist_between((self.x, self.y), self.f.goal),
-                               dist_between((other.x, other.y), self.f.goal))
-            else:
-                return tenative
+            return tenative
+            # if tenative == 0:
+            #     # If the two points have the same score, get the closest
+            #     # to the goal.
+            #     if self.x == other.x and \
+            #             self.y == other.y:
+            #         return 0
+            #     else:
+            #         return cmp(dist_between((self.x, self.y), self.f.goal),
+            #                    dist_between((other.x, other.y), self.f.goal))
+            # else:
+            #     return tenative
 
 
 def dist_between(point_a, point_b):
@@ -62,7 +63,7 @@ def dist_between(point_a, point_b):
     """
     a = point_b[0] - point_a[0]
     b = point_b[1] - point_a[1]
-    result = math.sqrt(a ** 2 + b ** 2)
+    result = math.sqrt(a ** 2.0 + b ** 2.0)
     # print result
     return result
 
@@ -154,15 +155,14 @@ def a_star(field, start, goal, heuristic_cost_estimate, neighbors_fn=None):
 # I include the field incase future heuristics need to access values from it.
 def crow(f, cell0, cell1):
     "A hypotense of a triangle."
-    return math.sqrt((cell1[0] - cell0[0]) ** 2.0 + \
-                     (cell1[1] - cell0[1]) ** 2.0)
+    return dist_between(cell0, cell1)
 
 
 def manhattan(f, cell0, cell1):
     """
     Calculate the manhattan distance.
     """
-    return (abs(cell1[0] - cell0[0]) + abs(cell1[1] - cell0[1]))
+    return (abs(cell1[0] - cell0[0]) + abs(cell1[1] - cell0[1])) * 20
 
 
 def naive(f, cell0, cell1):
@@ -189,18 +189,24 @@ if __name__ == '__main__':
     from matplotlib.pylab import imshow, show, figure
     import time
 
-    c = Costmap2D(20, 20, resolution=0.25)
-    c.goal = (c.width - 1, c.height - 1)
-    c.start = (0, 0)
-    # Obstacle(3, 1, 2, 10).draw(c)
-    # Obstacle(2, 9, 3, 10).draw(c)
-    Obstacle(13, 3, 1, 11).draw(c)
-    Obstacle(6, 14, 8, 1).draw(c)
+    c = Costmap2D(20, 20, resolution=0.5)
+    c.goal = (c.width - 1, 0)
+    c.start = (0, c.height - 1)
+    Obstacle(2, 2, 1, 4).draw(c)
+    Obstacle(2, 2, 8, 1).draw(c)
+    Obstacle(16, 3, 1, 11).draw(c)
+    Obstacle(6, 14, 11, 1).draw(c)
 
     d = copy.copy(c)
     d.data = c.data.copy()
     e = copy.copy(c)
     e.data = c.data.copy()
+    cc = copy.copy(c)
+    cc.data = c.data.copy()
+    dc = copy.copy(c)
+    dc.data = c.data.copy()
+    ec = copy.copy(c)
+    ec.data = c.data.copy()
 
     start = time.time()
     naive_r = a_star(c, c.start, c.goal, naive)
@@ -220,15 +226,48 @@ if __name__ == '__main__':
 
     print 'Crow:', end - start
 
+    cc.start = (0, 0)
+    cc.goal = (cc.width - 1, cc.height - 1)
+    start = time.time()
+    c_naive_r = a_star(cc, cc.start, cc.goal, naive)
+    end = time.time()
+
+    print 'Naive:', end - start
+
+    dc.start = (0, 0)
+    dc.goal = (dc.width - 1, dc.height - 1)
+    start = time.time()
+    c_manhattan_r = a_star(dc, dc.start, dc.goal, manhattan)
+    end = time.time()
+
+    print 'Manhattan:', end - start
+
+    ec.start = (0, 0)
+    ec.goal = (ec.width - 1, ec.height - 1)
+    start = time.time()
+    c_crow_r = a_star(ec, ec.start, ec.goal, crow)
+    end = time.time()
+
+    print 'Crow:', end - start
+
     # Sets the blocks of obstacles to a relatively distinct color
-    naive_max_cell = c.data.max() * -1
+    naive_max_cell = c.data.max() * -1.0
     c.data[c.data == -1] = naive_max_cell / 2.0
-
-    manhattan_max_cell = d.data.max() * -1
+    
+    manhattan_max_cell = d.data.max() * -1.0
     d.data[d.data == -1] = manhattan_max_cell / 2.0
-
-    crow_max_cell = e.data.max() * -1
+    
+    crow_max_cell = e.data.max() * -1.0
     e.data[e.data == -1] = crow_max_cell / 2.0
+
+    c_naive_max_cell = cc.data.max() * -1.0
+    cc.data[cc.data == -1] = c_naive_max_cell / 2.0
+
+    c_manhattan_max_cell = dc.data.max() * -1.0
+    dc.data[dc.data == -1] = c_manhattan_max_cell / 2.0
+
+    c_crow_max_cell = ec.data.max() * -1.0
+    ec.data[ec.data == -1] = c_crow_max_cell / 2.0
 
     # Sets the line for the path to a very distinct color
     # max_counter makes the line change colors as it reaches the goal
@@ -236,28 +275,52 @@ if __name__ == '__main__':
     for (x, y) in naive_r:
         max_counter += 1
         c.data[x, y] = naive_max_cell - max_counter
-
+    
     max_counter = 0
     for (x, y) in manhattan_r:
         max_counter += 1
         d.data[x, y] = manhattan_max_cell - max_counter
-
+    
     max_counter = 0
     for (x, y) in crow_r:
         max_counter += 1
         e.data[x, y] = crow_max_cell - max_counter
 
+    max_counter = 0
+    for (x, y) in c_naive_r:
+        max_counter += 1
+        cc.data[x, y] = c_naive_max_cell - max_counter
+
+    max_counter = 0
+    for (x, y) in c_manhattan_r:
+        max_counter += 1
+        dc.data[x, y] = c_manhattan_max_cell - max_counter
+
+    max_counter = 0
+    for (x, y) in c_crow_r:
+        max_counter += 1
+        ec.data[x, y] = c_crow_max_cell - max_counter
+
     fig = figure()
-    fig.subplots_adjust(hspace=0.01, wspace=0.01,
-                        bottom=0.07, top=1.0,
-                        left=0.04, right=1.0)
-    axes = fig.add_subplot(1, 3, 1)
+    fig.subplots_adjust(hspace=0.21, wspace=0.21,
+                        bottom=0.07, top=0.96,
+                        left=0.09, right=0.96)
+    axes = fig.add_subplot(2, 3, 1)
     axes.imshow(c.data.T, interpolation='nearest')
     axes.set_title('Naive')
-    axes = fig.add_subplot(1, 3, 2)
+    axes = fig.add_subplot(2, 3, 2)
     axes.imshow(d.data.T, interpolation='nearest')
     axes.set_title('Manhattan')
-    axes = fig.add_subplot(1, 3, 3)
+    axes = fig.add_subplot(2, 3, 3)
     axes.imshow(e.data.T, interpolation='nearest')
+    axes.set_title('Crow')
+    axes = fig.add_subplot(2, 3, 4)
+    axes.imshow(cc.data.T, interpolation='nearest')
+    axes.set_title('Naive')
+    axes = fig.add_subplot(2, 3, 5)
+    axes.imshow(dc.data.T, interpolation='nearest')
+    axes.set_title('Manhattan')
+    axes = fig.add_subplot(2, 3, 6)
+    axes.imshow(ec.data.T, interpolation='nearest')
     axes.set_title('Crow')
     show()
