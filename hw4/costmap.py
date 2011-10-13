@@ -78,10 +78,11 @@ class Costmap2D(object):
     
     def get_cardinals(self, x, y):
         """Returns the N, S, E, W neighbors of the cell at the given x, y"""
-        return [(x, y) for x, y in zip([x+1, x, x-1, x],\
-                                       [y, y+1, y, y-1])\
-                                           if 0 <= x < self.width and \
-                                              0 <= y < self.height]
+        neighbors = []
+        for x_, y_ in zip([x+1, x, x-1, x], [y, y+1, y, y-1]):
+            if 0 <= x_ < self.width and 0 <= y_ < self.height:
+                neighbors.append((x_, y_))
+        return neighbors
     
 
 if __name__ == '__main__':
