@@ -10,35 +10,45 @@ class Point(object):
     A point represents a position on the map. However, they are sorted by their
     distance to the goal.
     """
-    def __init__(self, f, x, y):
+    def __init__(self, f, f_score, x, y):
         """
         Creates a new Point, it takes the field, and an f_score array as well.
         """
         self.f = f
         self.x = x
         self.y = y
+        self.f_score = f_score
 
     def __cmp__(self, other):
         """
         Compares a Point to another point or a tuple (x, y).
+        
+        TODO(ash_gti): Check this. It seems off...
         """
+        my_pos = (self.x, self.y)
         if type(other) == tuple:
+            # Tuples are only passed to see if we are in the openset
+            # thus, we don't really care about the f_score, we only
+            # need to check for equality really.
+            other_pos = other
             if self.x == other[0] and self.y == other[1]:
                 return 0
-            if dist_between((other[0], other[1]), self.f.goal)\
+            elif dist_between((other[0], other[1]), self.f.goal)\
                > dist_between((self.x, self.y), self.f.goal):
                 return -1
             else:
                 return 1
         else:
-            if self.x == other.x and self.y == other.y:
-                return 0
-            if dist_between((other.x, other.y), self.f.goal)\
-               > dist_between((self.x, self.y), self.f.goal):
-                return -1
-            else:
-                return 1
-
+            other_pos = (other.x, other.y)
+            # if self.x == other.x and \
+            #         self.y == other.y:
+            #     return 0
+            # elif dist_between((other.x, other.y), self.f.goal)\
+            #         > dist_between((self.x, self.y), self.f.goal):
+            #     return -1
+            # else:
+            #     return 1
+            return cmp(self.f_score[my_pos], self.f_score[other_pos])
 
 def dist_between(point_a, point_b):
     """
@@ -47,24 +57,26 @@ def dist_between(point_a, point_b):
     """
     a = point_b[0] - point_a[0]
     b = point_b[1] - point_a[1]
-    return math.sqrt(a ** 2 + b ** 2)
+    result = math.sqrt(a ** 2 + b ** 2)
+    # print result
+    return result
 
 
-def a_star(field, start, goal, heuristic_cost_estimate):
+def a_star(field, start, goal, heuristic_cost_estimate, diagonal=True):
     "A function that returns a path as a list of coordinates"
     width = field.width
     height = field.height
 
-    g_score = np.zeros(width * height, dtype='int32').reshape(width, height)
-    h_score = np.zeros(width * height, dtype='int32').reshape(width, height)
-    f_score = np.zeros(width * height, dtype='int32').reshape(width, height)
+    g_score = np.zeros(width * height, dtype=float).reshape(width, height)
+    h_score = np.zeros(width * height, dtype=float).reshape(width, height)
+    f_score = np.zeros(width * height, dtype=float).reshape(width, height)
 
     # The set of nodes already evaluated.
     closedset = set()
 
     # The set of tentative nodes to be evaluated, initially containing the
     # start node
-    openset = [Point(field, *start)]
+    openset = [Point(field, f_score, *start)]
     heapq.heapify(openset)
 
     # The map of navigated nodes.
@@ -77,18 +89,31 @@ def a_star(field, start, goal, heuristic_cost_estimate):
     # Estimated total cost from start to goal through y.
     f_score[start] = g_score[start] + h_score[start]
 
+    c = 0
+
     while openset:
+        c += 1
         # Find the lowest scoring node in the openset
         current_node = heapq.heappop(openset)
         x = (current_node.x, current_node.y)
 
+        # if c > 200:
+            # imshow(field.data.T, interpolation='nearest')
+            # show()
+
         if x == goal:
+            print c
             path = reconstruct_path(came_from, came_from[goal])
             path.append(goal)
+            print len(path)
             return path
 
         closedset.add(x)
-        for y in field.get_cardinals(*x):
+        if diagonal:
+            neighbors = field.get_neighbors(*x)
+        else:
+            neighbors = field.get_cardinals(*x)
+        for y in neighbors:
             if y in closedset:
                 continue
             if field[y] == -1:
@@ -96,7 +121,7 @@ def a_star(field, start, goal, heuristic_cost_estimate):
             tentative_g_score = g_score[x] + dist_between(x, y)
 
             if y not in openset:
-                heapq.heappush(openset, Point(field, *y))
+                heapq.heappush(openset, Point(field, f_score, *y))
                 tentative_is_better = True
             elif tentative_g_score > g_score[y]:
                 tentative_is_better = True
@@ -117,14 +142,14 @@ def a_star(field, start, goal, heuristic_cost_estimate):
 def crow(f, cell0, cell1):
     "A hypotense of a triangle."
     return math.sqrt((cell1[0] - cell0[0]) ** 2 + \
-                     (cell1[1] - cell0[1]) ** 2)
+                     (cell1[1] - cell0[1]) ** 2) * 10
 
 
 def manhattan(f, cell0, cell1):
     """
     Calculate the manhattan distance.
     """
-    return (abs(cell1[0] - cell0[0]) + abs(cell1[1] - cell0[1]))
+    return (abs(cell1[0] - cell0[0]) + abs(cell1[1] - cell0[1])) * 10
 
 
 def naive(f, cell0, cell1):
@@ -151,15 +176,16 @@ if __name__ == '__main__':
     from matplotlib.pylab import imshow, show
     import time
 
-    c = Costmap2D(10, 20, resolution=0.2)
+    c = Costmap2D(10, 20, resolution=0.25)
     c.goal = (c.width - 1, c.height - 1)
     c.start = (0, 0)
-    Obstacle(3, 3, 3, 10).draw(c)
+    Obstacle(3, 3, 2, 10).draw(c)
     Obstacle(5, 9, 3, 10).draw(c)
-    Obstacle(4, 16, 3, 3).draw(c)
+    Obstacle(0, 16, 6, 1).draw(c)
+    Obstacle(6, 7, 4, 1).draw(c)
 
     start = time.time()
-    r = a_star(c, c.start, c.goal, manhattan)
+    r = a_star(c, c.start, c.goal, manhattan, True)
     end = time.time()
 
     max_cell = c.data.max() * -1
