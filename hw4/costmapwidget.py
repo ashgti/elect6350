@@ -36,13 +36,15 @@ class Costmap2DFigure(FigureCanvas):
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
         
-        self.mpl_connect('pick_event', self.on_pick)
+        self.mpl_connect('button_release_event', self.on_mouse_release)
         
         FigureCanvas.setSizePolicy(self,
                                    QtGui.QSizePolicy.Expanding,
                                    QtGui.QSizePolicy.Expanding)
         
         FigureCanvas.updateGeometry(self)
+        
+        self.on_mouse_click = self.default_on_mouse_click
         
         # Idle control
         self.idle = True
@@ -53,9 +55,27 @@ class Costmap2DFigure(FigureCanvas):
         # Override costmap on change
         self.costmap.on_update = self.costmap_update_callback
     
-    def on_pick(self, pick_event):
-        """Gets called when an object is picked"""
-        print pick_event
+    def on_mouse_release(self, e):
+        """Gets called when a mouse button is released"""
+        if self.on_mouse_click != None:
+            self.on_mouse_click(e)
+    
+    def default_on_mouse_click(self, e):
+        """Default function for mouse clicking"""
+        if e.xdata == None or e.ydata == None:
+            return
+        from math import floor
+        coord = (floor(e.xdata+0.5)-0.5, floor(e.ydata+0.5)-0.5)
+        if -0.5 > coord[0] < self.costmap.width-1.5 or \
+           -0.5 > coord[1] < self.costmap.height-1.5:
+            return
+        if e.button == 1:
+            self.start = Rectangle(coord, 1, 1, color='g')
+        elif e.button == 3:
+            self.goal = Rectangle(coord, 1, 1, color='k')
+        else:
+            return
+        self.on_map_update()
     
     def connect_stuff(self):
         """Make Qt connections"""

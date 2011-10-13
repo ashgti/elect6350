@@ -22,7 +22,6 @@ class Costmap2D(object):
         self.data = np.zeros(self.width*self.height, dtype = dtype)
         self.data = self.data.reshape(self.width, self.height)
         
-        self.neighbors = np.zeros(8, dtype=self.dtype)
         self.on_update = None
     
     def __repr__(self):
