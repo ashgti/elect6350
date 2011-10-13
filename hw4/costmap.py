@@ -80,8 +80,8 @@ class Costmap2D(object):
         """Returns the N, S, E, W neighbors of the cell at the given x, y"""
         return [(x, y) for x, y in zip([x+1, x, x-1, x],\
                                        [y, y+1, y, y-1])\
-                           if  0 <= x < self.width \
-                           and 0 <= y < self.height]
+                                           if 0 <= x < self.width and \
+                                              0 <= y < self.height]
     
 
 if __name__ == '__main__':
