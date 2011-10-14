@@ -15,7 +15,7 @@ class PotentialField(object):
         
         self.katt = 1.0
         self.krep = 1.0
-        self.roi = 100.0 # Region of Influence
+        self.roi = 10.0 # Region of Influence
         self.obstacle_cells = []
         
         self.first_run = True

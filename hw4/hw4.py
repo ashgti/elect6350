@@ -18,7 +18,7 @@ from a_star import AStar, manhattan, naive, crow
 
 DEFAULT_WIDTH = 20
 DEFAULT_HEIGHT = 10
-DEFAULT_RESOLUTION = 0.25
+DEFAULT_RESOLUTION = 0.5
 
 DEFAULT_TIMEOUT = 0.1
 
@@ -76,13 +76,13 @@ class AStarAlgorithmWidget(AlgorithmWidget):
         self.costmap = Costmap2D(DEFAULT_WIDTH, DEFAULT_HEIGHT,
                                  resolution=DEFAULT_RESOLUTION)
         Obstacle(3,3,3,3).draw(self.costmap)
-        Obstacle(5,9,3,3).draw(self.costmap)
-        Obstacle(4,16,3,3).draw(self.costmap)
+        Obstacle(9,5,3,3).draw(self.costmap)
+        Obstacle(16,4,3,3).draw(self.costmap)
 
         self.costmap_widget = Costmap2DWidget(self.costmap,
                                               parent=self, 
                                               show_goal=False,
-                                              show_colorbar=False)
+                                              show_colorbar=True)
         self.costmap_widget.canvas.show_start = True
         self.costmap_widget.canvas.show_goal = True
         temp = self.costmap_widget.canvas.start_coord
@@ -114,8 +114,8 @@ class AStarAlgorithmWidget(AlgorithmWidget):
         self.costmap_widget.canvas.freeze = True
         self.costmap[:] = 0.0
         Obstacle(3,3,3,3).draw(self.costmap)
-        Obstacle(5,9,3,3).draw(self.costmap)
-        Obstacle(4,16,3,3).draw(self.costmap)
+        Obstacle(9,5,3,3).draw(self.costmap)
+        Obstacle(16,4,3,3).draw(self.costmap)
 
         temp = self.costmap_widget.canvas.start_coord
         self.start_coord = (floor(temp[0]+0.5), floor(temp[1]+0.5))
@@ -181,8 +181,8 @@ class VoronoiAlgorithmWidget(AlgorithmWidget):
         """Sets up the algorithm"""
         self.costmap = Costmap2D(DEFAULT_WIDTH, DEFAULT_HEIGHT, resolution=DEFAULT_RESOLUTION)
         Obstacle(3,3,3,3).draw(self.costmap)
-        Obstacle(5,9,3,3).draw(self.costmap)
-        Obstacle(4,16,3,3).draw(self.costmap)
+        Obstacle(9,5,3,3).draw(self.costmap)
+        Obstacle(16,4,3,3).draw(self.costmap)
 
         self.costmap_widget = Costmap2DWidget(self.costmap, parent = self, show_goal = False,
                                                 show_colorbar = self.colorbar)
@@ -202,8 +202,8 @@ class VoronoiAlgorithmWidget(AlgorithmWidget):
         self.costmap_widget.canvas.freeze = True
         self.costmap[:] = 0.0
         Obstacle(3,3,3,3).draw(self.costmap)
-        Obstacle(5,9,3,3).draw(self.costmap)
-        Obstacle(4,16,3,3).draw(self.costmap)
+        Obstacle(9,5,3,3).draw(self.costmap)
+        Obstacle(16,4,3,3).draw(self.costmap)
 
         self.vo = VoronoiExpansion(self.costmap)
         self.costmap_widget.canvas.freeze = False
@@ -214,16 +214,20 @@ class Homework4App(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         
-        algorithms = []
-        
-        algorithms.append(BrushfireAlgorithmWidget(self))
-        algorithms.append(PotentialAlgorithmWidget(self, True))
-        algorithms.append(AStarAlgorithmWidget(self))
-        algorithms.append(VoronoiAlgorithmWidget(self, True))
+        ba = BrushfireAlgorithmWidget(self)
+        pa = PotentialAlgorithmWidget(self, True)
+        aa = AStarAlgorithmWidget(self)
+        va = VoronoiAlgorithmWidget(self, True)
         
         layout = QtGui.QHBoxLayout()
-        for algorithm in algorithms:
-            layout.addWidget(algorithm)
+        l1 = QtGui.QVBoxLayout()
+        l1.addWidget(ba)
+        l1.addWidget(pa)
+        l2 = QtGui.QVBoxLayout()
+        l2.addWidget(aa)
+        l2.addWidget(va)
+        layout.addLayout(l1)
+        layout.addLayout(l2)
         self.setLayout(layout)
     
 
