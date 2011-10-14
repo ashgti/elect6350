@@ -14,7 +14,7 @@ DEFAULT_RESOLUTION = 1.0
 DEFAULT_TIMEOUT = 0.1
 
 # DEFAULT_DELAY = 0.05
-DEFAULT_DELAY = 0.1
+DEFAULT_DELAY = 0.0
 
 class AlgorithmWidget(QtGui.QGroupBox):
     toggle_running_button_state = QtCore.Signal(bool)

@@ -18,7 +18,7 @@ from a_star import AStar, manhattan, naive, crow
 
 DEFAULT_WIDTH = 20
 DEFAULT_HEIGHT = 10
-DEFAULT_RESOLUTION = 0.5
+DEFAULT_RESOLUTION = 0.25
 
 DEFAULT_TIMEOUT = 0.1
 
@@ -96,18 +96,19 @@ class AStarAlgorithmWidget(AlgorithmWidget):
 
     def step_solution(self):
         """Steps the solution"""
-        self.costmap_widget.canvas.freeze = True
-        count = 0
-        while count < 25:
-            count += 1
-            result = self.a_star.step_solution()
-            if result == False:
-                self.costmap_widget.canvas.freeze = False
-                self.costmap_widget.canvas.on_map_update()
-                return result
-        self.costmap_widget.canvas.freeze = False
-        self.costmap_widget.canvas.on_map_update()
-        return True
+        # self.costmap_widget.canvas.freeze = True
+        # count = 0
+        # while count < 25:
+        #     count += 1
+        #     result = self.a_star.step_solution()
+        #     if result == False:
+        #         self.costmap_widget.canvas.freeze = False
+        #         self.costmap_widget.canvas.on_map_update()
+        #         return result
+        # self.costmap_widget.canvas.freeze = False
+        # self.costmap_widget.canvas.on_map_update()
+        # return True
+        return self.a_star.step_solution()
 
     def reset_algorithm(self):
         """Resets the algorithm"""
@@ -214,7 +215,7 @@ class Homework4App(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         
-        ba = BrushfireAlgorithmWidget(self)
+        ba = BrushfireAlgorithmWidget(self, True)
         pa = PotentialAlgorithmWidget(self, True)
         aa = AStarAlgorithmWidget(self)
         va = VoronoiAlgorithmWidget(self, True)
@@ -228,6 +229,7 @@ class Homework4App(QtGui.QWidget):
         l2.addWidget(va)
         layout.addLayout(l1)
         layout.addLayout(l2)
+        # layout.addWidget(va)
         self.setLayout(layout)
     
 

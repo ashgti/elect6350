@@ -15,7 +15,7 @@ class PotentialField(object):
         
         self.katt = 1.0
         self.krep = 1.0
-        self.roi = 10.0 # Region of Influence
+        self.roi = 100.0 # Region of Influence
         self.obstacle_cells = []
         
         self.first_run = True
@@ -59,19 +59,28 @@ class PotentialField(object):
     
 
 if __name__ == '__main__':
-    c = Costmap2D(10,20, resolution=0.25)
+    c = Costmap2D(10,20, resolution=1.0)
     Obstacle(3,3,3,3).draw(c)
     Obstacle(5,9,3,3).draw(c)
     Obstacle(4,16,3,3).draw(c)
     pf = PotentialField(c)
-    from matplotlib.pylab import imshow, show
-    imshow(c.data.T, interpolation='nearest')
-    show()
+    # from matplotlib.pylab import imshow, show
+    # imshow(c.data.T, interpolation='nearest')
+    # show()
     pf.solve()
     try:
         from matplotlib.pylab import imshow, show
         imshow(c.data.T, interpolation='nearest')
         show()
+        # import matplotlib.pyplot as plt
+        # from mpl_toolkits.mplot3d import Axes3D
+        # fig = plt.figure()
+        # ax = fig.add_subplot(111, projection='3d')
+        # import numpy as np
+        # data = np.zeros((c.width, c.height))
+        # print data
+        # ax.plot_surface([range(c.width)]*c.height, [range(c.height)]*c.width, data)
+        # plt.show()
     except ImportError:
         import sys
         sys.stderr.write("You don't seem to have matplotlib, http://matplotlib.sourceforge.net/\n")

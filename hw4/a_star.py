@@ -78,7 +78,7 @@ class AStar(object):
         """
         max_cell = self.field.data.max() * -1.0
         max_counter = 0
-        # self.field[self.field.data == -1] = max_cell / 2.0
+        self.field[self.field.data == -1] = max_cell / 2.0
         if self.path:
             for (x, y) in self.path:
                 max_counter += 1

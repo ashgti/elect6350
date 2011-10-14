@@ -132,11 +132,11 @@ class Costmap2DWidget(QtGui.QWidget):
         # Setup display
         self.canvas = Costmap2DFigure(costmap, show_start = show_start, show_goal = show_goal, 
                         show_colorbar = show_colorbar)
-        self.toolbar = NavigationToolbar(self.canvas, self)
+        # self.toolbar = NavigationToolbar(self.canvas, self)
         
         # Setup layout
         layout = QtGui.QVBoxLayout()
-        layout.addWidget(self.toolbar)
+        # layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
         self.setLayout(layout)
     
