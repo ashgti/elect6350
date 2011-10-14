@@ -5,57 +5,6 @@ import collections
 import copy
 
 
-class Point(object):
-    """
-    A point represents a position on the map. However, they are sorted by their
-    distance to the goal.
-    """
-    def __init__(self, f, f_score, x, y):
-        """
-        Creates a new Point, it takes the field, and an f_score array as well.
-        """
-        self.f = f
-        self.x = x
-        self.y = y
-        self.f_score = f_score
-
-    def __str__(self):
-        return str((self.f_score[(self.x, self.y)], (self.x, self.y)))
-
-    def __cmp__(self, other):
-        """
-        Compares a Point to another point or a tuple (x, y).
-
-        TODO(ash_gti): Check this. It seems off...
-        """
-        my_pos = (self.x, self.y)
-        if type(other) == tuple:
-            # Tuples are only passed to see if we are in the openset
-            # thus, we don't really care about the f_score, we only
-            # need to check for equality really.
-            other_pos = other
-            if self.x == other[0] and self.y == other[1]:
-                return 0
-            else:
-                return cmp(dist_between((self.x, self.y), self.f.goal),
-                           dist_between((other[0], other[1]), self.f.goal))
-        else:
-            other_pos = (other.x, other.y)
-            tenative = cmp(self.f_score[my_pos], self.f_score[other_pos])
-            return tenative
-            # if tenative == 0:
-            #     # If the two points have the same score, get the closest
-            #     # to the goal.
-            #     if self.x == other.x and \
-            #             self.y == other.y:
-            #         return 0
-            #     else:
-            #         return cmp(dist_between((self.x, self.y), self.f.goal),
-            #                    dist_between((other.x, other.y), self.f.goal))
-            # else:
-            #     return tenative
-
-
 def dist_between(point_a, point_b):
     """
     Pothagoreans theorm, the distance between 2 cells.
@@ -96,7 +45,7 @@ def a_star(field, start, goal, heuristic_cost_estimate, neighbors_fn=None):
 
     # The set of tentative nodes to be evaluated, initially containing the
     # start node
-    openset = [Point(field, f_score, *start)]
+    openset = [(f_score[start], start)]
     heapq.heapify(openset)
 
     # The map of navigated nodes.
@@ -115,7 +64,7 @@ def a_star(field, start, goal, heuristic_cost_estimate, neighbors_fn=None):
         c += 1
         # Find the lowest scoring node in the openset
         current_node = heapq.heappop(openset)
-        x = (current_node.x, current_node.y)
+        x = current_node[1]
 
         if x == goal:
             print "Total Loops:", c
@@ -132,17 +81,18 @@ def a_star(field, start, goal, heuristic_cost_estimate, neighbors_fn=None):
                 continue
             if field[y] == -1:
                 continue
+
             tentative_g_score = g_score[x] + dist_between(x, y)
 
-            if y not in openset:
-                heapq.heappush(openset, Point(field, f_score, *y))
-                tentative_is_better = True
+            # Strip out the f_scores from the openset and check if it exists
+            if y not in [v[1] for v in openset]:
+                came_from[y] = x
+                g_score[y] = tentative_g_score
+                h_score[y] = heuristic_cost_estimate(field, y, goal)
+                f_score[y] = g_score[y] + h_score[y]
+                field[y] = f_score[y]
+                heapq.heappush(openset, (f_score[y], y))
             elif tentative_g_score < g_score[y]:
-                tentative_is_better = True
-            else:
-                tentative_is_better = False
-
-            if tentative_is_better:
                 came_from[y] = x
                 g_score[y] = tentative_g_score
                 h_score[y] = heuristic_cost_estimate(field, y, goal)
@@ -162,7 +112,7 @@ def manhattan(f, cell0, cell1):
     """
     Calculate the manhattan distance.
     """
-    return (abs(cell1[0] - cell0[0]) + abs(cell1[1] - cell0[1])) * 20
+    return (abs(cell1[0] - cell0[0]) + abs(cell1[1] - cell0[1]))
 
 
 def naive(f, cell0, cell1):
@@ -182,6 +132,12 @@ def reconstruct_path(came_from, current_node):
         return [current_node]
 
 
+def display_graph(c):
+    # Sets the blocks of obstacles to a relatively distinct color
+    imshow(c.data, interpolation='nearest')
+    show()
+
+
 if __name__ == '__main__':
     from costmap import Costmap2D
     from obstacle import Obstacle
@@ -189,14 +145,16 @@ if __name__ == '__main__':
     from matplotlib.pylab import imshow, show, figure
     import time
 
-    c = Costmap2D(20, 20, resolution=0.25)
-    c.goal = (c.width - 1, c.height - 1)
-    c.start = (0, 0)
-
-    Obstacle(3, 1, 2, 10).draw(c)
-    Obstacle(2, 9, 3, 10).draw(c)
-    Obstacle(1, 12, 6, 1).draw(c)
-    Obstacle(6, 14, 4, 1).draw(c)
+    c = Costmap2D(20, 20, resolution=1.0)
+    c.goal = (c.width - 1, 0)
+    c.start = (0, c.height - 1)
+    Obstacle(2, 2, 1, 4).draw(c)
+    Obstacle(2, 2, 8, 1).draw(c)
+    Obstacle(16, 3, 1, 11).draw(c)
+    Obstacle(6, 14, 11, 1).draw(c)
+    # Obstacle(4,3,3,3).draw(c)
+    # Obstacle(5,9,3,3).draw(c)
+    # Obstacle(4,16,3,3).draw(c)
 
     d = copy.copy(c)
     d.data = c.data.copy()
@@ -230,6 +188,7 @@ if __name__ == '__main__':
     cc.start = (0, 0)
     cc.goal = (cc.width - 1, cc.height - 1)
     start = time.time()
+    cc.data[(0, 1)] = 5
     c_naive_r = a_star(cc, cc.start, cc.goal, naive)
     end = time.time()
 
@@ -254,10 +213,10 @@ if __name__ == '__main__':
     # Sets the blocks of obstacles to a relatively distinct color
     naive_max_cell = c.data.max() * -1.0
     c.data[c.data == -1] = naive_max_cell / 2.0
-    
+
     manhattan_max_cell = d.data.max() * -1.0
     d.data[d.data == -1] = manhattan_max_cell / 2.0
-    
+
     crow_max_cell = e.data.max() * -1.0
     e.data[e.data == -1] = crow_max_cell / 2.0
 
@@ -276,12 +235,12 @@ if __name__ == '__main__':
     for (x, y) in naive_r:
         max_counter += 1
         c.data[x, y] = naive_max_cell - max_counter
-    
+
     max_counter = 0
     for (x, y) in manhattan_r:
         max_counter += 1
         d.data[x, y] = manhattan_max_cell - max_counter
-    
+
     max_counter = 0
     for (x, y) in crow_r:
         max_counter += 1
