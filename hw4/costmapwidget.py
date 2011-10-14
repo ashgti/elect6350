@@ -13,6 +13,8 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as Naviga
 from matplotlib.patches import Circle, Rectangle
 from matplotlib.pylab import imshow
 
+from threading import Lock
+
 from costmap import Costmap2D
 from obstacle import Obstacle
 
@@ -22,6 +24,7 @@ class Costmap2DFigure(FigureCanvas):
     """Implements an imshow figure for showing the costmap2d"""
     def __init__(self, costmap, parent=None, width=5.0, height=4.0, dpi=100, interpolation='nearest',
                     show_start = True, show_goal = True, show_colorbar = True):
+        self.lock = Lock()
         self.costmap = costmap
         self.freeze = False
         self.interpolation = interpolation
@@ -106,6 +109,7 @@ class Costmap2DFigure(FigureCanvas):
     def on_map_update(self):
         """Slot to handle the costmap_changed signal"""
         if self.freeze: return
+        self.lock.acquire()
         axes = self.axes.imshow(self.costmap.data.T, interpolation=self.interpolation)
         if self.show_colorbar:
             self.fig.delaxes(self.fig.axes[1])
@@ -115,6 +119,7 @@ class Costmap2DFigure(FigureCanvas):
         if self.show_goal: self.axes.add_artist(self.goal)
         self.draw()
         self.idle = True
+        self.lock.release()
     
 
 class Costmap2DWidget(QtGui.QWidget):

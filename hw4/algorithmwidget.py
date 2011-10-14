@@ -14,7 +14,7 @@ DEFAULT_RESOLUTION = 1.0
 DEFAULT_TIMEOUT = 0.1
 
 # DEFAULT_DELAY = 0.05
-DEFAULT_DELAY = 0.0
+DEFAULT_DELAY = 0.1
 
 class AlgorithmWidget(QtGui.QGroupBox):
     toggle_running_button_state = QtCore.Signal(bool)
@@ -48,8 +48,10 @@ class AlgorithmWidget(QtGui.QGroupBox):
         
         self.run_button = QtGui.QPushButton("Run")
         self.step_button = QtGui.QPushButton("Step")
+        self.stop_button = QtGui.QPushButton("Stop")
         self.reset_button = QtGui.QPushButton("Reset")
-        self.buttons = [self.run_button, self.step_button, self.reset_button]
+        self.stop_button.setEnabled(False)
+        self.buttons = [self.run_button, self.step_button, self.stop_button, self.reset_button]
         
         self.make_connections()
         
@@ -68,10 +70,12 @@ class AlgorithmWidget(QtGui.QGroupBox):
         """Makes the Qt connections"""
         self.run_button.clicked.connect(self.on_run_clicked)
         self.step_button.clicked.connect(self.on_step_clicked)
+        self.stop_button.clicked.connect(self.on_stop_clicked)
         self.reset_button.clicked.connect(self.on_reset_clicked)
         
         self.toggle_running_button_state.connect(self.run_button.setEnabled)
         self.toggle_running_button_state.connect(self.step_button.setEnabled)
+        self.toggle_running_button_state.connect(self.stop_button.setEnabled)
         self.toggle_running_button_state.connect(self.reset_button.setEnabled)
         
         self.algorithm_finished.connect(self.run_button.setEnabled)
@@ -82,9 +86,11 @@ class AlgorithmWidget(QtGui.QGroupBox):
         while self.running:
             self.step_event.wait(DEFAULT_TIMEOUT)
             if self.step_event.is_set():
-                self.toggle_running_button_state.emit(False)
+                if not self.stepping:
+                    self.toggle_running_button_state.emit(False)
                 result = self.step_solution()
-                self.toggle_running_button_state.emit(True)
+                if not self.stepping:
+                    self.toggle_running_button_state.emit(True)
                 if not result:
                     self.algorithm_finished.emit(False)
                     self.running = False
@@ -148,6 +154,14 @@ class AlgorithmWidget(QtGui.QGroupBox):
         """Called when step is clicked"""
         self.start_threading()
         self.stepping = True
+        self.step_event.set()
+
+    @QtCore.Slot()
+    def on_stop_clicked(self):
+        """Called when stop is clicked"""
+        self.stop_button.setEnabled(False)
+        if self.stepping == False:
+            self.stepping = True
         self.step_event.set()
     
     @QtCore.Slot()
