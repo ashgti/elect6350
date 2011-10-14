@@ -9,13 +9,44 @@ from costmap import Costmap2D
 from costmapwidget import Costmap2DWidget
 from obstacle import Obstacle
 from brushfire import BrushfireExpansion
+from potentialfield import PotentialField
 from algorithmwidget import AlgorithmWidget
 
-DEFAULT_WIDTH = 10
-DEFAULT_HEIGHT = 20
-DEFAULT_RESOLUTION = 0.5
+DEFAULT_WIDTH = 20
+DEFAULT_HEIGHT = 10
+DEFAULT_RESOLUTION = 0.25
 
 DEFAULT_TIMEOUT = 0.1
+
+class PotentialAlgorithmWidget(AlgorithmWidget):
+    def __init__(self, parent=None, colorbar = False):
+        self.colorbar = colorbar
+        AlgorithmWidget.__init__(self, "Potential Field Algorithm", parent)
+        self.pack_buttons()
+    
+    def setup_algorithm(self):
+        """Sets up the algorithm"""
+        self.costmap = Costmap2D(DEFAULT_WIDTH, DEFAULT_HEIGHT, resolution=DEFAULT_RESOLUTION)
+        Obstacle(3,3,3,3).draw(self.costmap)
+        Obstacle(9,5,3,3).draw(self.costmap)
+        Obstacle(16,4,3,3).draw(self.costmap)
+        
+        self.costmap_widget = Costmap2DWidget(self.costmap, parent = self, show_goal = False,
+                                                show_start = False, show_colorbar = self.colorbar)
+        self.pf = PotentialField(self.costmap)
+    
+    def step_solution(self):
+        return self.pf.step_solution()
+    
+    def reset_algorithm(self):
+        self.costmap[:] = 0.0
+        Obstacle(3,3,3,3).draw(self.costmap)
+        Obstacle(9,5,3,3).draw(self.costmap)
+        Obstacle(16,4,3,3).draw(self.costmap)
+        
+        self.pf = PotentialField(self.costmap)
+        self.costmap_widget.canvas.on_map_update()
+    
 
 class BrushfireAlgorithmWidget(AlgorithmWidget):
     def __init__(self, parent = None, colorbar = False):
@@ -25,11 +56,10 @@ class BrushfireAlgorithmWidget(AlgorithmWidget):
     
     def setup_algorithm(self):
         """Sets up the algorithm"""
-        # print 'Setting up BE'
         self.costmap = Costmap2D(DEFAULT_WIDTH, DEFAULT_HEIGHT, resolution=DEFAULT_RESOLUTION)
         Obstacle(3,3,3,3).draw(self.costmap)
-        Obstacle(5,9,3,3).draw(self.costmap)
-        Obstacle(4,16,3,3).draw(self.costmap)
+        Obstacle(9,5,3,3).draw(self.costmap)
+        Obstacle(16,4,3,3).draw(self.costmap)
         
         self.costmap_widget = Costmap2DWidget(self.costmap, parent = self, show_goal = False,
                                                 show_colorbar = self.colorbar)
@@ -42,18 +72,15 @@ class BrushfireAlgorithmWidget(AlgorithmWidget):
     
     def step_solution(self):
         """Steps the solution"""
-        # print 'Stepping BE'
-        result = self.be.step_solution()
-        return result
+        return self.be.step_solution()
     
     def reset_algorithm(self):
         """Resets the algorithm"""
-        # print 'Resetting BE'
         self.costmap_widget.canvas.freeze = True
         self.costmap[:] = 0.0
         Obstacle(3,3,3,3).draw(self.costmap)
-        Obstacle(5,9,3,3).draw(self.costmap)
-        Obstacle(4,16,3,3).draw(self.costmap)
+        Obstacle(9,5,3,3).draw(self.costmap)
+        Obstacle(16,4,3,3).draw(self.costmap)
         
         self.be = BrushfireExpansion(self.costmap)
         temp = self.costmap_widget.canvas.start_coord
@@ -70,7 +97,7 @@ class Homework4App(QtGui.QWidget):
         algorithms = []
         
         algorithms.append(BrushfireAlgorithmWidget(self))
-        algorithms.append(BrushfireAlgorithmWidget(self, True))
+        algorithms.append(PotentialAlgorithmWidget(self, True))
         
         layout = QtGui.QHBoxLayout()
         for algorithm in algorithms:
