@@ -11,6 +11,7 @@ from costmap import Costmap2D
 from costmapwidget import Costmap2DWidget
 from obstacle import Obstacle
 from brushfire import BrushfireExpansion
+from voronoi import VoronoiExpansion
 from algorithmwidget import AlgorithmWidget
 from a_star import AStar, manhattan, naive, crow
 
@@ -23,7 +24,6 @@ DEFAULT_TIMEOUT = 0.1
 
 class AStarAlgorithmWidget(AlgorithmWidget):
     def __init__(self, parent=None):
-        self.lock = Lock()
         self.heuristic = naive
         AlgorithmWidget.__init__(self, "A* Algorithm", parent)
         self.combo_box = QtGui.QComboBox(parent)
@@ -66,7 +66,6 @@ class AStarAlgorithmWidget(AlgorithmWidget):
 
     def step_solution(self):
         """Steps the solution"""
-        self.lock.acquire()
         self.costmap_widget.canvas.freeze = True
         count = 0
         while count < 25:
@@ -75,11 +74,9 @@ class AStarAlgorithmWidget(AlgorithmWidget):
             if result == False:
                 self.costmap_widget.canvas.freeze = False
                 self.costmap_widget.canvas.on_map_update()
-                self.lock.release()
                 return result
         self.costmap_widget.canvas.freeze = False
         self.costmap_widget.canvas.on_map_update()
-        self.lock.release()
         return True
 
     def reset_algorithm(self):
@@ -148,6 +145,45 @@ class BrushfireAlgorithmWidget(AlgorithmWidget):
         self.costmap_widget.canvas.on_map_update()
     
 
+class VoronoiAlgorithmWidget(AlgorithmWidget):
+    def __init__(self, parent = None, colorbar = False):
+        self.colorbar = colorbar
+        AlgorithmWidget.__init__(self, "Voronoi Algorithm", parent)
+        self.pack_buttons()
+
+    def setup_algorithm(self):
+        """Sets up the algorithm"""
+        self.costmap = Costmap2D(DEFAULT_WIDTH, DEFAULT_HEIGHT, resolution=DEFAULT_RESOLUTION)
+        Obstacle(3,3,3,3).draw(self.costmap)
+        Obstacle(5,9,3,3).draw(self.costmap)
+        Obstacle(4,16,3,3).draw(self.costmap)
+
+        self.costmap_widget = Costmap2DWidget(self.costmap, parent = self, show_goal = False,
+                                                show_colorbar = self.colorbar)
+        self.costmap_widget.canvas.show_start = False
+        self.costmap_widget.canvas.show_goal = False
+        self.vo = VoronoiExpansion(self.costmap)
+
+    def step_solution(self):
+        """Steps the solution"""
+        result = self.vo.step_solution()
+        self.costmap_widget.canvas.on_map_update()
+
+        return result
+
+    def reset_algorithm(self):
+        """Resets the algorithm"""
+        self.costmap_widget.canvas.freeze = True
+        self.costmap[:] = 0.0
+        Obstacle(3,3,3,3).draw(self.costmap)
+        Obstacle(5,9,3,3).draw(self.costmap)
+        Obstacle(4,16,3,3).draw(self.costmap)
+
+        self.vo = VoronoiExpansion(self.costmap)
+        self.costmap_widget.canvas.freeze = False
+        self.costmap_widget.canvas.on_map_update()
+
+
 class Homework4App(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -156,6 +192,7 @@ class Homework4App(QtGui.QWidget):
         
         algorithms.append(AStarAlgorithmWidget(self))
         algorithms.append(BrushfireAlgorithmWidget(self, True))
+        algorithms.append(VoronoiAlgorithmWidget(self, True))
         
         layout = QtGui.QHBoxLayout()
         for algorithm in algorithms:
