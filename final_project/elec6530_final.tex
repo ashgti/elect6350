@@ -1,0 +1,91 @@
+%% elec6530_final.tex
+%% 2011/11/14
+%% by William J. Woodall IV
+%% and John Harrison
+
+\documentclass[journal]{IEEEtran}
+
+%% For Citations
+\usepackage{cite}
+
+%% For graphics
+\usepackage[pdftex]{graphicx}
+\graphicspath{{images/}}
+\DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+
+%% For URL's
+\usepackage{url}
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\begin{document}
+  
+  \title{Simulated Path Planning for Auburn's Autonomous Lawnmower}
+  
+  \author{John~Harrison~and
+          William~J.~Woodall~IV% <-this % stops a space
+  
+  % Thanks
+  % \thanks{Dr. Thaddeus A. Roppel}}
+  }
+  
+  % Paper Header
+  \markboth{ELEC 5530/6530 Introduction to Autonomous Mobile Robotics}%
+  {Woodall and Harrison:Simulated Path Planning for Auburn's Autonomous Lawnmower}
+  
+  % Make room for the title
+  \maketitle
+  
+  % Abstract
+  \begin{abstract}
+    Auburn University has a competition Autonomous Lawnmower team and competes
+    every year at ION's competition\cite{IONAutomow} in Dayton, OH.  This
+    paper describes the how the team has approached coverage path planning for 
+    the lawnmower given the competition constraints.  The competition setting 
+    dictates a closed polygon filed, which can be concave, and it will contain 
+    several static and dynamic obstacles.  The path planner for the lawnmower 
+    has to navigate this field while covering as much as the field as possible 
+    and without competition field specific knowledge.  The algorithm 
+    implemented here have results that resemble the output of the 
+    Boustrophedon Cellular Decomposition\cite{Choset_1997_1416} method.  The 
+    paper describes the implementation of this algorithm and some 
+    examples of its performance in different situations.  Additionally, the 
+    paper shows the simulation environment setup in the two dimensional, 
+    kinematic robotics simulator, Stage\cite{vaughan2000stage}.
+  \end{abstract}
+  
+  % Keywords
+  \begin{IEEEkeywords}
+    Coverage Path Planning, Mobile Robotics, Navigation, Simulation
+  \end{IEEEkeywords}
+  
+  % Don't know if I need this...
+  \IEEEpeerreviewmaketitle
+  
+  \section{Introduction}
+  \IEEEPARstart{C}{overage} path planning determines a path that guarantees coverage of an area in an admissible manner for the agent.  This type of path planning can be applied to many areas of work including detection of unexploded ordinance, floor cleaning, or crop plowing, just to name a few. In the case of this paper the application is lawn-mowing, the agent is Auburn's Autonomous Lawnmower, and the area is the competition field.  Though this paper sticks to these constraints the implementation here should be generalized enough to be easily applied to other applications or situations.  This paper assumes a few other things about the environment.  First, the assumption is made that this planning is done off-line with knowledge about the area to be covered and the obstacles in the environment.  This means that there is no planned dynamic obstacle avoidance at this point.  The previous competition year's field, which was surveyed with RTK GPS equipment, will be used as a test shape during this paper.
+  
+  \section{Brief Survey of Coverage Planning Research}
+  
+  \section{Description of the Algorithm}
+  In this section of the paper we will describe the algorithm that will be used on the Autonomous Lawnmower for path planning.  The basic coverage ``shape'' is called the Boustrophedon path, which literally means ``the way of the ox.''\cite{Choset_1997_1416}  As previously stated the resulting coverage path resembles the output of a Boustrophedon Cellular Decomposition in that it covers each cell of the area in order, but at no point during this implementation of the algorithm is the cellular decomposition formally done.  This effect is just a product of the manner in which the algorithm selects the order of waypoints to be traveled to.
+  
+  \subsection{Field Rotation}
+  One of the parameters of our algorithm is the angle at which the ``cutting lines'' are set.  You can see in <INSERT FIGURE HERE> that this algorithm can plan and coverage at angle specified angle.
+  
+  \section{Conclusion}
+  This is where the conclusion goes.
+  
+  \bibliographystyle{IEEEtran}
+  \bibliography{citations}
+  
+  \begin{IEEEbiography}{William J. Woodall IV}
+  Biography text here.
+  \end{IEEEbiography}
+  
+  \begin{IEEEbiography}{John Harrison}
+  Biography text here.
+  \end{IEEEbiography}
+  
+\end{document}
