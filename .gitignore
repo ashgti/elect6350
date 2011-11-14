@@ -1,3 +1,11 @@
 build
 bin
+.DS_Store
+*.zip
 *.pyc
+*.aux
+*.bbl
+*.pdf
+*.log
+*.blg
+*.synctex.gz

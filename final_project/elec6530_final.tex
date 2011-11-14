@@ -66,16 +66,27 @@
   \section{Introduction}
   \IEEEPARstart{C}{overage} path planning determines a path that guarantees coverage of an area in an admissible manner for the agent.  This type of path planning can be applied to many areas of work including detection of unexploded ordinance, floor cleaning, or crop plowing, just to name a few. In the case of this paper the application is lawn-mowing, the agent is Auburn's Autonomous Lawnmower, and the area is the competition field.  Though this paper sticks to these constraints the implementation here should be generalized enough to be easily applied to other applications or situations.  This paper assumes a few other things about the environment.  First, the assumption is made that this planning is done off-line with knowledge about the area to be covered and the obstacles in the environment.  This means that there is no planned dynamic obstacle avoidance at this point.  The previous competition year's field, which was surveyed with RTK GPS equipment, will be used as a test shape during this paper.
   
-  \section{Brief Survey of Coverage Planning Research}
-  
   \section{Description of the Algorithm}
   In this section of the paper we will describe the algorithm that will be used on the Autonomous Lawnmower for path planning.  The basic coverage ``shape'' is called the Boustrophedon path, which literally means ``the way of the ox.''\cite{Choset_1997_1416}  As previously stated the resulting coverage path resembles the output of a Boustrophedon Cellular Decomposition in that it covers each cell of the area in order, but at no point during this implementation of the algorithm is the cellular decomposition formally done.  This effect is just a product of the manner in which the algorithm selects the order of waypoints to be traveled to.
   
   \subsection{Field Rotation}
-  One of the parameters of our algorithm is the angle at which the ``cutting lines'' are set.  You can see in <INSERT FIGURE HERE> that this algorithm can plan and coverage at angle specified angle.
+  One of the parameters of our algorithm is the angle at which the ``cutting lines'' are set.  You can see in <INSERT FIGURE 1 HERE> that this algorithm can plan and coverage at angle specified angle.  This allows us to pick, offline, the best cutting direction for a given field.  There are also some tools for automatically picking the best angle of cutting and starting point.  <INSERT FIGURE 2 HERE> shows how the angle of the longest edge has been selected automatically as the cutting angle.  Other heuristics or methods could be used to determine the best angle of cutting.  In order to simplify the work in generating a path that adheres to the cutting angle, the field polygon's points are simply rotated into a frame where the cutting angle is along the y axis.  The map is rotated into the cutting angle frame using rotation matrices\cite[p.60]{siegwart2004introduction}, each point in the points that define the polygon to be rotated is multiplied by the inverse rotation matrix given by:
+  
+  $$R\left( \theta  \right)^{-1}\; =\; \left[ \begin{array}{ccc} \cos \left( \theta  \right) & -\sin \left( \theta  \right) & 0 \\ \sin \left( \theta  \right) & \cos \left( \theta  \right) & 0 \\ 0 & 0 & 1 \end{array} \right]$$
+  
+  Where $\theta$ is the angle of cutting specified.  After applying the rotation to the field then the planning can assume vertical lines intersecting the field will produce the desired cutting lines.  Once the planning is complete, the resulting waypoints of the path are each multiplied by the normal rotation matrix given by:
+  
+  $$R\left( \theta  \right)\; =\; \left[ \begin{array}{ccc} \cos \left( \theta  \right) & \sin \left( \theta  \right) & 0 \\ -\sin \left( \theta  \right) & \cos \left( \theta  \right) & 0 \\ 0 & 0 & 1 \end{array} \right]$$
+  
+  Again, with $\theta$ representing the angle of cut.  This puts the path back into the map frame.
+  
+  \subsection{Finding Intersection Points}
+  
   
   \section{Conclusion}
   This is where the conclusion goes.
+  
+  \newpage
   
   \bibliographystyle{IEEEtran}
   \bibliography{citations}
